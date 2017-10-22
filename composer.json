@@ -1,0 +1,45 @@
+{
+  "name": "flipboxfactory/domains",
+  "description": "Element domains",
+  "version": "1.0.0-beta",
+  "keywords": [
+    "flipbox",
+    "craft",
+    "yii2"
+  ],
+  "config": {
+    "optimize-autoloader": true
+  },
+  "require": {
+    "craftcms/cms": "~3.0.0-beta.17"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^5.0",
+    "squizlabs/php_codesniffer": "^2.0",
+    "codeception/codeception": "^2.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "flipbox\\domains\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "flipbox\\domains\\tests\\": "tests/src/"
+    }
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Flipbox Digital",
+      "homepage": "https://flipboxdigital.com/"
+    }
+  ],
+  "support": {
+    "email": "support@flipboxdigital.com",
+    "issues": "https://github.com/flipboxfactory/domains/issues?state=open",
+    "source": "https://github.com/flipboxfactory/domains",
+    "docs": "https://github.com/flipboxfactory/domains",
+    "rss": "https://github.com/flipboxfactory/domains/commits/master.atom"
+  }
+}
