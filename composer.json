@@ -3,6 +3,7 @@
   "description": "Element domains",
   "minimum-stability": "beta",
   "prefer-stable": true,
+  "type": "craft-plugin",
   "keywords": [
     "flipbox",
     "craft",
@@ -43,5 +44,17 @@
     "source": "https://github.com/flipboxfactory/domains",
     "docs": "https://github.com/flipboxfactory/domains",
     "rss": "https://github.com/flipboxfactory/domains/commits/master.atom"
+  },
+  "extra": {
+    "name": "Domains",
+    "handle": "domains",
+    "class": "flipbox\\domains\\Domains",
+    "hasCpSettings": true,
+    "hasCpSection": true,
+    "schemaVersion": "1.0.0",
+    "components": {
+      "field": "flipbox\\domains\\services\\Field",
+      "relationship": "flipbox\\domains\\services\\Relationship"
+    }
   }
 }

@@ -12,6 +12,6 @@ namespace flipbox\domains\actions;
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since 1.0.0
  */
-class Dissaciate extends AbstractDomain
+class Dissociate extends AbstractDomain
 {
 }
