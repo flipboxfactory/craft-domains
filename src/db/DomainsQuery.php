@@ -249,7 +249,7 @@ class DomainsQuery extends Query
             $this->andWhere(Db::parseDateParam('dateUpdated', $this->dateUpdated));
         }
 
-        $this->_applyOrderByParams();
+        $this->applyOrderByParams();
     }
 
     /**
@@ -258,7 +258,7 @@ class DomainsQuery extends Query
      * @throws Exception if the DB connection doesn't support fixed ordering
      * @throws QueryAbortedException
      */
-    private function _applyOrderByParams()
+    private function applyOrderByParams()
     {
         if ($this->orderBy === null) {
             return;

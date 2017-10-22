@@ -54,7 +54,7 @@ class Domains extends Field
     {
         $rules = parent::getElementValidationRules();
 
-        if($this->unique) {
+        if ($this->unique) {
             $rules[$this->handle] = UniqueValidator::class;
         }
 
@@ -99,7 +99,6 @@ class Domains extends Field
                         ]
                     ]
                 );
-
             } else {
                 $query->id(false);
             }
@@ -147,7 +146,9 @@ class Domains extends Field
             $operator = ($value === ':notempty:' ? '!=' : '=');
 
             $query->subQuery->andWhere(
-                "(select count([[{$alias}.id]]) from " . $name . " {{{$alias}}} where [[{$alias}.elementId]] = [[elements.id]]) {$operator} 0"
+                "(select count([[{$alias}.id]]) from " .
+                $name .
+                " {{{$alias}}} where [[{$alias}.elementId]] = [[elements.id]]) {$operator} 0"
             );
         } else {
             if ($value !== null) {

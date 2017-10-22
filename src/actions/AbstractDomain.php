@@ -18,5 +18,4 @@ class AbstractDomain
 {
 
     use CheckAccess;
-
 }
