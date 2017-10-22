@@ -2,6 +2,8 @@
   "name": "flipboxfactory/domains",
   "description": "Element domains",
   "version": "1.0.0-beta",
+  "minimum-stability": "beta",
+  "prefer-stable": true,
   "keywords": [
     "flipbox",
     "craft",
