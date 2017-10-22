@@ -25,7 +25,7 @@ class CreateDomainsTable extends Migration
         $this->createTable($this->tableName, [
             'id' => $this->primaryKey(),
             'elementId' => $this->integer()->notNull(),
-            'domain' => $this->integer()->notNull(),
+            'domain' => $this->string()->notNull(),
             'siteId' => $this->integer()->notNull(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),

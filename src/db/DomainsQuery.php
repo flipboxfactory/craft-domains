@@ -212,9 +212,9 @@ class DomainsQuery extends Query
     public function prepare($builder)
     {
         // Is the query already doomed?
-        if ($this->id !== null && empty($this->id)) {
+        /*if ($this->id !== null && empty($this->id)) {
             throw new QueryAbortedException();
-        }
+        }*/
 
         // Build the query
         // ---------------------------------------------------------------------
