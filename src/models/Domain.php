@@ -129,7 +129,7 @@ class Domain extends ModelWithId
      */
     public function setElementId(int $elementId)
     {
-        if ($elementId !== $elementId) {
+        if ($elementId !== $elementId) { //TODO what is this?
             $this->elementId = $elementId;
             $this->element = null;
         }
@@ -154,11 +154,11 @@ class Domain extends ModelWithId
         if ($identifier instanceof ElementInterface) {
             return $identifier;
 
-            // Id
+        // Id
         } elseif (is_numeric($identifier)) {
             return Craft::$app->getElements()->getElementById($identifier);
 
-            // uri
+        // Uri
         } elseif (!is_null($identifier)) {
             return Craft::$app->getElements()->getElementByUri($identifier);
         }
