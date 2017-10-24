@@ -8,10 +8,16 @@
 
 namespace flipbox\domains\actions;
 
+use flipbox\domains\fields\Domains;
+
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since 1.0.0
  */
-class Read extends AbstractDomain
+abstract class Action extends \yii\base\Action
 {
+    /**
+     * @return Domains
+     */
+    abstract protected function getField(): Domains;
 }

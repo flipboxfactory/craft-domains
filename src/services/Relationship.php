@@ -11,10 +11,13 @@ namespace flipbox\domains\services;
 use Craft;
 use craft\base\ElementInterface;
 use craft\db\Query;
+use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\events\RelationshipEvent;
 use flipbox\domains\fields\Domains;
+use flipbox\domains\models\Domain;
 use yii\base\Component;
+use yii\base\Exception;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
@@ -44,22 +47,97 @@ class Relationship extends Component
 
     /**
      * @param Domains $field
+     * @param Domain $domain
+     * @return bool
+     */
+    public function save(
+        Domains $field,
+        Domain $domain
+    ) {
+        return $this->associate(
+            $field,
+            $domain->domain,
+            $domain->getElementId(),
+            $domain->siteId
+        );
+    }
+
+    /**
+     * @param Domains $field
+     * @param Domain $domain
+     * @return bool
+     */
+    public function delete(
+        Domains $field,
+        Domain $domain
+    ) {
+        return $this->dissociate(
+            $field,
+            $domain->domain,
+            $domain->getElementId(),
+            $domain->siteId
+        );
+    }
+
+    /**
+     * @param Domains $field
      * @param string $domain
-     * @param ElementInterface $element
+     * @param int $elementId
+     * @param int|null $siteId
+     * @return Domain|null
+     */
+    public function find(
+        Domains $field,
+        string $domain,
+        int $elementId,
+        int $siteId = null
+    ) {
+        return (new DomainsQuery($field))
+            ->elementId($elementId)
+            ->domain($domain)
+            ->siteId($siteId)
+            ->one();
+    }
+
+    /**
+     * @param Domains $field
+     * @param string $domain
+     * @param int $elementId
+     * @param int|null $siteId
+     * @return Domain
+     * @throws Exception
+     */
+    public function get(
+        Domains $field,
+        string $domain,
+        int $elementId,
+        int $siteId = null
+    ) {
+
+        if(!$model = $this->find($field, $domain, $elementId, $siteId))  {
+            throw new Exception("Unable to find relationship");
+        }
+
+        return $model;
+    }
+    /**
+     * @param Domains $field
+     * @param string $domain
+     * @param int $elementId
      * @param int|null $siteId
      * @return bool
      */
     public function associate(
         Domains $field,
         string $domain,
-        ElementInterface $element,
+        int $elementId,
         int $siteId = null
     ) {
         // The 'before' event
         $event = new RelationshipEvent([
             'field' => $field,
             'domain' => $domain,
-            'element' => $element,
+            'elementId' => $elementId,
             'siteId' => $siteId
         ]);
 
@@ -76,7 +154,7 @@ class Relationship extends Component
 
         $columns = [
             'domain' => $domain,
-            'elementId' => $element->getId(),
+            'elementId' => $elementId,
             'siteId' => $this->resolveSiteId($siteId)
         ];
 
@@ -109,14 +187,14 @@ class Relationship extends Component
     /**
      * @param Domains $field
      * @param string $domain ,
-     * @param ElementInterface $element
+     * @param int $elementId
      * @param int|null $siteId
      * @return bool
      */
     public function dissociate(
         Domains $field,
         string $domain,
-        ElementInterface $element,
+        int $elementId,
         int $siteId = null
     ) {
 
@@ -124,7 +202,7 @@ class Relationship extends Component
         $event = new RelationshipEvent([
             'field' => $field,
             'domain' => $domain,
-            'element' => $element,
+            'elementId' => $elementId,
             'siteId' => $siteId
         ]);
 
@@ -142,7 +220,7 @@ class Relationship extends Component
         Craft::$app->getDb()->createCommand()
             ->delete($table, [
                 'domain' => $domain,
-                'elementId' => $element->getId(),
+                'elementId' => $elementId,
                 'siteId' => $this->resolveSiteId($siteId)
             ])->execute();
 

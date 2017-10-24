@@ -16,10 +16,38 @@ use craft\db\QueryAbortedException;
 use craft\helpers\Db;
 use craft\helpers\StringHelper;
 use craft\models\Site;
+use flipbox\domains\models\Domain;
+use flipbox\domains\fields\Domains;
 use yii\base\Exception;
+use flipbox\domains\Domains as DomainsPlugin;
 
+/**
+ * Class DomainsQuery
+ * @package flipbox\domains\db
+ *
+ * @method Domain|null one($db = null)
+ * @method Domain[] all($db = null)
+ */
 class DomainsQuery extends Query
 {
+
+    /**
+     * DomainsQuery constructor.
+     * @param Domains $domains
+     * @param array $config
+     */
+    public function __construct(Domains $domains, $config = [])
+    {
+        parent::__construct($config);
+
+        // Set table name
+        if($this->from === null) {
+            $alias = DomainsPlugin::getInstance()->getField()->getTableAlias($domains);
+            $name = DomainsPlugin::getInstance()->getField()->getTableName($domains);
+
+            $this->from([$name . ' ' . $alias]);
+        }
+    }
 
     /**
      * @var int|int[]|false|null The record ID(s). Prefix IDs with "not " to exclude them.
@@ -212,9 +240,9 @@ class DomainsQuery extends Query
     public function prepare($builder)
     {
         // Is the query already doomed?
-        /*if ($this->id !== null && empty($this->id)) {
+        if ($this->id !== null && empty($this->id)) {
             throw new QueryAbortedException();
-        }*/
+        }
 
         // Build the query
         // ---------------------------------------------------------------------
@@ -278,7 +306,7 @@ class DomainsQuery extends Query
 
                 $this->orderBy = [new FixedOrderExpression('id', $ids, $db)];
             } else {
-                $this->orderBy = ['elements.dateCreated' => SORT_DESC];
+                $this->orderBy = ['dateCreated' => SORT_DESC];
             }
         }
 
@@ -290,7 +318,7 @@ class DomainsQuery extends Query
             $orderColumnMap = [];
 
             // Prevent “1052 Column 'id' in order clause is ambiguous” MySQL error
-            $orderColumnMap['id'] = 'elements.id';
+            $orderColumnMap['id'] = 'id';
 
             foreach ($orderColumnMap as $orderValue => $columnName) {
                 // Are we ordering by this column name?

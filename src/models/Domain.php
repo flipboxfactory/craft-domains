@@ -6,7 +6,7 @@
  * @link       https://www.flipboxfactory.com/software/domains/
  */
 
-namespace flipbox\domains\actions;
+namespace flipbox\domains\models;
 
 use Craft;
 use craft\base\ElementInterface;
@@ -129,7 +129,7 @@ class Domain extends ModelWithId
      */
     public function setElementId(int $elementId)
     {
-        if ($elementId !== $elementId) {
+        if ($this->elementId !== $elementId) {
             $this->elementId = $elementId;
             $this->element = null;
         }
@@ -154,11 +154,11 @@ class Domain extends ModelWithId
         if ($identifier instanceof ElementInterface) {
             return $identifier;
 
-            // Id
+        // Id
         } elseif (is_numeric($identifier)) {
             return Craft::$app->getElements()->getElementById($identifier);
 
-            // uri
+        // Uri
         } elseif (!is_null($identifier)) {
             return Craft::$app->getElements()->getElementByUri($identifier);
         }
