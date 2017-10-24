@@ -8,14 +8,13 @@
 
 namespace flipbox\domains\actions;
 
-use flipbox\spark\actions\traits\CheckAccess;
+use flipbox\spark\actions\model\traits\Read;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since 1.0.0
  */
-class AbstractDomain
+class View extends Action
 {
-
-    use CheckAccess;
+    use Read, traits\Lookup;
 }

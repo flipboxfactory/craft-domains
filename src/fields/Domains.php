@@ -39,10 +39,16 @@ class Domains extends Field
      */
     public $allowLimit = true;
 
+    /**
+     * @inheritdoc
+     */
     public static function hasContentColumn(): bool {
         return false;
     }
 
+    /**
+     * @inheritdoc
+     */
     public function getSearchKeywords($value, ElementInterface $element): string {
         return '';
     }
@@ -61,10 +67,10 @@ class Domains extends Field
     public function getElementValidationRules(): array
     {
         $rules = parent::getElementValidationRules();
-//
-//        if ($this->unique) {
-//            $rules[$this->handle] = UniqueValidator::class;
-//        }
+
+        if ($this->unique) {
+            $rules[$this->handle] = UniqueValidator::class;
+        }
 
         return $rules;
     }
@@ -74,12 +80,13 @@ class Domains extends Field
      */
     public function normalizeValue($value, ElementInterface $element = null)
     {
-        if ($value instanceof ElementQueryInterface) {
+        // All good
+        if ($value instanceof DomainsQuery) {
             return $value;
         }
 
         /** @var Element|null $element */
-        $query = (new DomainsQuery())
+        $query = (new DomainsQuery($this))
             ->siteId($this->targetSiteId($element));
 
         // $value will be an array of element IDs if there was a validation error or we're loading a draft/version.
