@@ -129,7 +129,7 @@ class Domain extends ModelWithId
      */
     public function setElementId(int $elementId)
     {
-        if ($elementId !== $elementId) { //TODO what is this?
+        if ($this->elementId !== $elementId) {
             $this->elementId = $elementId;
             $this->element = null;
         }
