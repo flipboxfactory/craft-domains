@@ -98,8 +98,7 @@ class Domains extends Field
         }
 
         /** @var Element|null $element */
-        $query = (new DomainsQuery($this))
-            ->siteId($this->targetSiteId($element));
+        $query = (new DomainsQuery($this));
 
         // $value will be an array of element IDs if there was a validation error or we're loading a draft/version.
         if (is_array($value)) {
@@ -109,23 +108,18 @@ class Domains extends Field
         } else {
             if ($value !== '' && $element && $element->id) {
                 $alias = DomainsPlugin::getInstance()->getField()->getTableAlias($this);
-                $name = DomainsPlugin::getInstance()->getField()->getTableName($this);
 
-                $query->innerJoin(
-                    $name . ' ' . $alias,
+                $query->where([
+                    'and',
                     [
-                        'and',
-                        '[[' . $alias . '.elementId]] = [[elements.id]]',
-                        [
-                            $alias . '.elementId' => $element->id
-                        ],
-                        [
-                            'or',
-                            [$alias . '.siteId' => null],
-                            [$alias . '.siteId' => $element->siteId]
-                        ]
+                        $alias . '.elementId' => $element->id
+                    ],
+                    [
+                        'or',
+                        [$alias . '.siteId' => null],
+                        [$alias . '.siteId' => $element->siteId]
                     ]
-                );
+                ]);
             } else {
                 $query->id(false);
             }
@@ -218,9 +212,14 @@ class Domains extends Field
 
     /**
      * @inheritdoc
+     *
+     * @param DomainsQuery $value
      */
     public function getInputHtml($value, ElementInterface $element = null): string
     {
+
+        var_dump($value->all());
+
         $input = '<input type="hidden" name="'.$this->handle.'" value="">';
 
         $tableHtml = $this->_getInputHtml($value, $element, false);

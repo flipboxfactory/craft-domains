@@ -103,7 +103,7 @@ class DomainsQuery extends Query
 
         if ($this->select === null) {
             // Use ** as a placeholder for "all the default columns"
-            $this->select = ['**'];
+            $this->select = ['*'];
         }
     }
 
@@ -278,6 +278,8 @@ class DomainsQuery extends Query
         }
 
         $this->applyOrderByParams();
+
+        return parent::prepare($builder);
     }
 
     /**
