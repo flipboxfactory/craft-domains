@@ -16,6 +16,7 @@ use craft\elements\db\ElementQuery;
 use craft\elements\db\ElementQueryInterface;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
+use flipbox\domains\models\Domain;
 use flipbox\domains\validators\UniqueValidator; // TODO was recommended to not use this validator
 
 /**
@@ -98,30 +99,27 @@ class Domains extends Field
         }
 
         /** @var Element|null $element */
-        $query = (new DomainsQuery($this));
+        $query = new DomainsQuery($this);
 
-        // $value will be an array of element IDs if there was a validation error or we're loading a draft/version.
+        // Multisite
+        $query->siteId($this->targetSiteId($element));
+
+        // $value will be an array of domains
         if (is_array($value)) {
-            $query
-                ->id(array_values(array_filter($value)))
-                ->fixedOrder();
+            $models = [];
+            foreach($value as $val) {
+                $models[] = new Domain([
+                    'domain' => $val,
+                    'element' => $element
+                ]);
+            }
+            $query->setCachedResult($models);
         } else {
             if ($value !== '' && $element && $element->id) {
-                $alias = DomainsPlugin::getInstance()->getField()->getTableAlias($this);
-
-                $query->where([
-                    'and',
-                    [
-                        $alias . '.elementId' => $element->id
-                    ],
-                    [
-                        'or',
-                        [$alias . '.siteId' => null],
-                        [$alias . '.siteId' => $element->siteId]
-                    ]
-                ]);
+                $query->elementId($element->id);
             } else {
-                $query->id(false);
+                $query->elementId(false);
+                $query->domain(false);
             }
         }
 

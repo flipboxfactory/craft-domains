@@ -16,20 +16,19 @@ use craft\db\QueryAbortedException;
 use craft\helpers\Db;
 use craft\helpers\StringHelper;
 use craft\models\Site;
-use flipbox\domains\models\Domain;
-use flipbox\domains\fields\Domains;
-use yii\base\Exception;
 use flipbox\domains\Domains as DomainsPlugin;
+use flipbox\domains\fields\Domains;
+use flipbox\domains\models\Domain;
+use yii\base\ArrayableTrait;
+use yii\base\Exception;
+use yii\db\Connection;
 
-/**
- * Class DomainsQuery
- * @package flipbox\domains\db
- *
- * @method Domain|null one($db = null)
- * @method Domain[] all($db = null)
- */
 class DomainsQuery extends Query
 {
+    // Traits
+    // =========================================================================
+
+    use ArrayableTrait;
 
     /**
      * DomainsQuery constructor.
@@ -41,18 +40,13 @@ class DomainsQuery extends Query
         parent::__construct($config);
 
         // Set table name
-        if($this->from === null) {
+        if ($this->from === null) {
             $alias = DomainsPlugin::getInstance()->getField()->getTableAlias($domains);
             $name = DomainsPlugin::getInstance()->getField()->getTableName($domains);
 
             $this->from([$name . ' ' . $alias]);
         }
     }
-
-    /**
-     * @var int|int[]|false|null The record ID(s). Prefix IDs with "not " to exclude them.
-     */
-    public $id;
 
     /**
      * @var string|string[]|false|null The domain(s). Prefix domains with "not " to exclude them.
@@ -94,6 +88,21 @@ class DomainsQuery extends Query
      */
     public $orderBy = '';
 
+    // For internal use
+    // -------------------------------------------------------------------------
+
+    /**
+     * @var Domain[]|null The cached query result
+     * @see setCachedResult()
+     */
+    private $_result;
+
+    /**
+     * @var Domain[]|null The criteria params that were set when the cached query result was set
+     * @see setCachedResult()
+     */
+    private $_resultCriteria;
+
     /**
      * @inheritdoc
      */
@@ -105,16 +114,6 @@ class DomainsQuery extends Query
             // Use ** as a placeholder for "all the default columns"
             $this->select = ['*'];
         }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function id($value)
-    {
-        $this->id = $value;
-
-        return $this;
     }
 
     /**
@@ -240,27 +239,23 @@ class DomainsQuery extends Query
     public function prepare($builder)
     {
         // Is the query already doomed?
-        if ($this->id !== null && empty($this->id)) {
+        if ($this->domain !== null && empty($this->domain)) {
             throw new QueryAbortedException();
         }
 
         // Build the query
         // ---------------------------------------------------------------------
 
-        if ($this->id) {
-            $this->andWhere(Db::parseParam('id', $this->id));
-        }
-
         if ($this->domain) {
-            $this->andWhere(Db::parseDateParam('domain', $this->domain));
+            $this->andWhere(Db::parseParam('domain', $this->domain));
         }
 
         if ($this->elementId) {
-            $this->andWhere(Db::parseDateParam('elementId', $this->elementId));
+            $this->andWhere(Db::parseParam('elementId', $this->elementId));
         }
 
         if ($this->siteId) {
-            $this->andWhere(Db::parseDateParam('siteId', $this->siteId));
+            $this->andWhere(Db::parseParam('siteId', $this->siteId));
         } else {
             $this->siteId = Craft::$app->getSites()->currentSite->id;
         }
@@ -277,7 +272,7 @@ class DomainsQuery extends Query
             $this->andWhere(Db::parseDateParam('dateUpdated', $this->dateUpdated));
         }
 
-        $this->applyOrderByParams();
+        $this->applyOrderByParams($builder->db);
 
         return parent::prepare($builder);
     }
@@ -285,10 +280,13 @@ class DomainsQuery extends Query
     /**
      * Applies the 'fixedOrder' and 'orderBy' params to the query being prepared.
      *
+     * @param Connection|null $db The database connection used to generate the SQL statement.
+     *                            If this parameter is not given, the `db` application component will be used.
+     *
      * @throws Exception if the DB connection doesn't support fixed ordering
      * @throws QueryAbortedException
      */
-    private function applyOrderByParams()
+    private function applyOrderByParams(Connection $db = null)
     {
         if ($this->orderBy === null) {
             return;
@@ -297,16 +295,16 @@ class DomainsQuery extends Query
         // Any other empty value means we should set it
         if (empty($this->orderBy)) {
             if ($this->fixedOrder) {
-                $ids = $this->id;
-                if (!is_array($ids)) {
-                    $ids = is_string($ids) ? StringHelper::split($ids) : [$ids];
+                $domains = $this->domain;
+                if (!is_array($domains)) {
+                    $domains = is_string($domains) ? StringHelper::split($domains) : [$domains];
                 }
 
-                if (empty($ids)) {
+                if (empty($domains)) {
                     throw new QueryAbortedException;
                 }
 
-                $this->orderBy = [new FixedOrderExpression('id', $ids, $db)];
+                $this->orderBy = [new FixedOrderExpression('domain', $domains, $db)];
             } else {
                 $this->orderBy = ['dateCreated' => SORT_DESC];
             }
@@ -320,7 +318,7 @@ class DomainsQuery extends Query
             $orderColumnMap = [];
 
             // Prevent “1052 Column 'id' in order clause is ambiguous” MySQL error
-            $orderColumnMap['id'] = 'id';
+            $orderColumnMap['domain'] = 'domain';
 
             foreach ($orderColumnMap as $orderValue => $columnName) {
                 // Are we ordering by this column name?
@@ -337,5 +335,186 @@ class DomainsQuery extends Query
         if (!empty($orderBy)) {
             $this->orderBy($orderBy);
         }
+    }
+
+    /**
+     * @inheritdoc
+     *
+     * @return ElementInterface[]|array The resulting elements.
+     */
+    public function populate($rows)
+    {
+        if (empty($rows)) {
+            return [];
+        }
+
+        return $this->createModels(
+            parent::populate($rows)
+        );
+    }
+
+    /**
+     * @param $rows
+     * @return mixed
+     */
+    private function createModels($rows)
+    {
+        $models = [];
+
+        foreach ($rows as $key => $row) {
+            $models[$key] = $this->createModel($row);
+        }
+
+        return $models;
+    }
+
+    /**
+     * @param $row
+     * @return Domain
+     */
+    private function createModel($row): Domain
+    {
+        return new Domain($row);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function count($q = '*', $db = null)
+    {
+        // Cached?
+        if (($cachedResult = $this->getCachedResult()) !== null) {
+            return count($cachedResult);
+        }
+
+        return parent::count($q, $db) ?: 0;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function all($db = null)
+    {
+        // Cached?
+        if (($cachedResult = $this->getCachedResult()) !== null) {
+            return $cachedResult;
+        }
+
+        return parent::all($db);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function one($db = null)
+    {
+        // Cached?
+        if (($cachedResult = $this->getCachedResult()) !== null) {
+            // Conveniently, reset() returns false on an empty array, just like one() should do for an empty result
+            return reset($cachedResult);
+        }
+
+        $row = parent::one($db);
+
+        if ($row === false) {
+            return false;
+        }
+
+        return $this->createModel($row);
+    }
+
+    /**
+     * Executes the query and returns a single row of result at a given offset.
+     *
+     * @param int $n The offset of the row to return. If [[offset]] is set, $offset will be added to it.
+     * @param Connection|null $db The database connection used to generate the SQL statement.
+     *                            If this parameter is not given, the `db` application component will be used.
+     *
+     * @return Domain|array|bool The element or row of the query result. False is returned if the query
+     * results in nothing.
+     */
+    public function nth(int $n, Connection $db = null)
+    {
+        // Cached?
+        if (($cachedResult = $this->getCachedResult()) !== null) {
+            return $cachedResult[$n] ?? false;
+        }
+
+        return parent::nth($n, $db);
+    }
+
+    /**
+     * Returns the resulting domains set by [[setCachedResult()]], if the criteria params haven’t changed since then.
+     *
+     * @return Domain[]|null The resulting domains, or null if setCachedResult() was never called or the criteria has
+     * changed
+     * @see setCachedResult()
+     */
+    public function getCachedResult()
+    {
+        if ($this->_result === null) {
+            return null;
+        }
+
+        // Make sure the criteria hasn't changed
+        if ($this->_resultCriteria !== $this->getCriteria()) {
+            $this->_result = null;
+
+            return null;
+        }
+
+        return $this->_result;
+    }
+
+    /**
+     * Sets the resulting domains.
+     *
+     * If this is called, [[all()]] will return these domains rather than initiating a new SQL query,
+     * as long as none of the parameters have changed since setCachedResult() was called.
+     *
+     * @param Domain[] $elements The resulting elements.
+     *
+     * @see getCachedResult()
+     */
+    public function setCachedResult(array $elements)
+    {
+        $this->_result = $elements;
+        $this->_resultCriteria = $this->getCriteria();
+    }
+
+    /**
+     * Returns an array of the current criteria attribute values.
+     *
+     * @return array
+     */
+    public function getCriteria(): array
+    {
+        return $this->toArray($this->criteriaAttributes(), [], false);
+    }
+
+    /**
+     * Returns the query's criteria attributes.
+     *
+     * @return string[]
+     */
+    public function criteriaAttributes(): array
+    {
+        // By default, include all public, non-static properties that were defined by a sub class, and certain ones in this class
+        $class = new \ReflectionClass($this);
+        $names = [];
+
+        foreach ($class->getProperties(\ReflectionProperty::IS_PUBLIC) as $property) {
+            if (!$property->isStatic()) {
+                $dec = $property->getDeclaringClass();
+                if (
+                    ($dec->getName() === self::class || $dec->isSubclassOf(self::class)) &&
+                    !in_array($property->getName(), ['customFields', 'asArray'], true)
+                ) {
+                    $names[] = $property->getName();
+                }
+            }
+        }
+
+        return $names;
     }
 }
