@@ -17,7 +17,9 @@ use craft\elements\db\ElementQueryInterface;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\models\Domain;
-use flipbox\domains\validators\UniqueValidator; // TODO was recommended to not use this validator
+use flipbox\domains\validators\UniqueValidator;
+
+ // TODO was recommended to not use this validator
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
@@ -107,7 +109,7 @@ class Domains extends Field
         // $value will be an array of domains
         if (is_array($value)) {
             $models = [];
-            foreach($value as $val) {
+            foreach ($value as $val) {
                 $models[] = new Domain([
                     'domain' => $val,
                     'element' => $element
@@ -220,7 +222,7 @@ class Domains extends Field
 
         $input = '<input type="hidden" name="'.$this->handle.'" value="">';
 
-        $tableHtml = $this->_getInputHtml($value, $element, false);
+        $tableHtml = $this->getTableHtml($value, $element, false);
 
         if ($tableHtml) {
             $input .= $tableHtml;
@@ -238,7 +240,7 @@ class Domains extends Field
      *
      * @return string
      */
-    private function _getInputHtml($value, ElementInterface $element = null, bool $static): string
+    private function getTableHtml($value, ElementInterface $element = null, bool $static): string
     {
         $columns = $this->columns;
 
@@ -261,24 +263,28 @@ class Domains extends Field
 
             $id = Craft::$app->getView()->formatInputId($this->handle);
 
-            return Craft::$app->getView()->renderTemplate('_includes/forms/editableTable',
+            return Craft::$app->getView()->renderTemplate(
+                '_includes/forms/editableTable',
                 [
                     'id' => $id,
                     'name' => $this->handle,
                     'cols' => $columns,
                     'rows' => $value,
                     'static' => $static
-                ]);
+                ]
+            );
         }
 
         return null;
     }
 
-    public static function hasContentColumn(): bool {
+    public static function hasContentColumn(): bool
+    {
         return false;
     }
 
-    public function getSearchKeywords($value, ElementInterface $element): string {
+    public function getSearchKeywords($value, ElementInterface $element): string
+    {
         return '';
     }
 }

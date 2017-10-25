@@ -114,7 +114,7 @@ class Relationship extends Component
         int $siteId = null
     ) {
 
-        if(!$model = $this->find($field, $domain, $elementId, $siteId))  {
+        if (!$model = $this->find($field, $domain, $elementId, $siteId)) {
             throw new Exception("Unable to find relationship");
         }
 

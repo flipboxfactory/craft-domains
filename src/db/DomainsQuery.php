@@ -95,13 +95,13 @@ class DomainsQuery extends Query
      * @var Domain[]|null The cached query result
      * @see setCachedResult()
      */
-    private $_result;
+    private $result;
 
     /**
      * @var Domain[]|null The criteria params that were set when the cached query result was set
      * @see setCachedResult()
      */
-    private $_resultCriteria;
+    private $resultCriteria;
 
     /**
      * @inheritdoc
@@ -452,18 +452,18 @@ class DomainsQuery extends Query
      */
     public function getCachedResult()
     {
-        if ($this->_result === null) {
+        if ($this->result === null) {
             return null;
         }
 
         // Make sure the criteria hasn't changed
-        if ($this->_resultCriteria !== $this->getCriteria()) {
-            $this->_result = null;
+        if ($this->resultCriteria !== $this->getCriteria()) {
+            $this->result = null;
 
             return null;
         }
 
-        return $this->_result;
+        return $this->result;
     }
 
     /**
@@ -478,8 +478,8 @@ class DomainsQuery extends Query
      */
     public function setCachedResult(array $elements)
     {
-        $this->_result = $elements;
-        $this->_resultCriteria = $this->getCriteria();
+        $this->result = $elements;
+        $this->resultCriteria = $this->getCriteria();
     }
 
     /**
@@ -499,16 +499,15 @@ class DomainsQuery extends Query
      */
     public function criteriaAttributes(): array
     {
-        // By default, include all public, non-static properties that were defined by a sub class, and certain ones in this class
+        // By default, include all public, non-static properties that were defined by a sub class, and certain ones
+        // in this class
         $class = new \ReflectionClass($this);
         $names = [];
 
         foreach ($class->getProperties(\ReflectionProperty::IS_PUBLIC) as $property) {
             if (!$property->isStatic()) {
                 $dec = $property->getDeclaringClass();
-                if (
-                    ($dec->getName() === self::class || $dec->isSubclassOf(self::class)) &&
-                    !in_array($property->getName(), ['customFields', 'asArray'], true)
+                if (($dec->getName() === self::class || $dec->isSubclassOf(self::class))
                 ) {
                     $names[] = $property->getName();
                 }
