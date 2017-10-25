@@ -119,6 +119,7 @@ class DomainsQuery extends Query
     /**
      * @inheritdoc
      * @throws Exception if $value is an invalid site handle
+     * return static
      */
     public function element($value)
     {
@@ -139,6 +140,7 @@ class DomainsQuery extends Query
 
     /**
      * @inheritdoc
+     * return static
      */
     public function elementId($value)
     {
@@ -149,6 +151,7 @@ class DomainsQuery extends Query
 
     /**
      * @inheritdoc
+     * return static
      */
     public function domain($value)
     {
@@ -159,6 +162,7 @@ class DomainsQuery extends Query
 
     /**
      * @inheritdoc
+     * return static
      */
     public function uid($value)
     {
@@ -169,6 +173,7 @@ class DomainsQuery extends Query
 
     /**
      * @inheritdoc
+     * return static
      */
     public function fixedOrder(bool $value = true)
     {
@@ -179,6 +184,7 @@ class DomainsQuery extends Query
 
     /**
      * @inheritdoc
+     * return static
      */
     public function dateCreated($value)
     {
@@ -189,6 +195,7 @@ class DomainsQuery extends Query
 
     /**
      * @inheritdoc
+     * return static
      */
     public function dateUpdated($value)
     {

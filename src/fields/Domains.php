@@ -18,8 +18,9 @@ use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\models\Domain;
 use flipbox\domains\validators\UniqueValidator;
+use yii\base\Exception;
 
- // TODO was recommended to not use this validator
+// TODO was recommended to not use this validator
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
@@ -78,16 +79,49 @@ class Domains extends Field
     public function validateUniqueDomain($element, $fieldParams)
     {
         /** @var Element $element */
+
+        /** @var DomainsQuery $value */
         $value = $element->getFieldValue($this->handle);
 
-        // TODO remove everything before or after URL.com and set as submitted data
+        // If we have a cached result, let's validate them
+        if(($cachedResult = $value->getCachedResult()) !== null) {
+            $isValid = true;
+            $domains = [];
 
-        // TODO validate all submitted domains will be unique after save
+            foreach($cachedResult as $model) {
+                if(!$model->validate(['domain'])) {
+                    $isValid = false;
+                }
 
-        /* ADD ERRORS EXAMPLE
-        $element->addError($this->handle, Craft::t('app', '"{filename}" is not allowed in this field.', [
-            'filename' => $filename
-        ]));*/
+                $domains[$model->domain] = $model->domain;
+            }
+
+            // TODO - CHECK IF EXISTS ANYWHERE ELSE (OTHER THAN PREVIOUSLY ASSOCIATED)
+            if($this->unique === true) {
+                // Other elements occupy this domain
+
+                // TODO - ADD WHERE NOT CURRENT ELEMENT ID (IF APPLICABLE)
+                if($elementIds = (new DomainsQuery())
+                    ->select(['elementId'])
+                    ->andWhere(['domain' => $domains])
+                    ->column()
+                ) {
+                    /* ADD ERRORS EXAMPLE
+                    $element->addError($this->handle, Craft::t('app', '"{filename}" is not allowed in this field.', [
+                        'filename' => $filename
+                    ]));*/
+                }
+            }
+        }
+
+        if(!$isValid) {
+
+            /* ADD ERRORS EXAMPLE
+            $element->addError($this->handle, Craft::t('app', '"{filename}" is not allowed in this field.', [
+                'filename' => $filename
+            ]));*/
+
+        }
     }
 
     /**
@@ -103,13 +137,16 @@ class Domains extends Field
         /** @var Element|null $element */
         $query = new DomainsQuery($this);
 
-        // Multisite
+        // Multi-site
         $query->siteId($this->targetSiteId($element));
 
         // $value will be an array of domains
         if (is_array($value)) {
             $models = [];
             foreach ($value as $val) {
+
+                // TODO remove everything before or after URL.com and set as submitted data
+
                 $models[] = new Domain([
                     'domain' => $val,
                     'element' => $element
@@ -194,13 +231,54 @@ class Domains extends Field
 
     public function afterElementSave(ElementInterface $element, bool $isNew)
     {
-        // Get domains
+        /** @var Element $element */
+
         /** @var DomainsQuery $value */
         $value = $element->getFieldValue($this->handle);
 
         // TODO update domains list
             // delete any removed
             // upsert new/existing
+
+        // If we have a cached result, let's save them
+        if(($cachedResult = $value->getCachedResult()) !== null) {
+            // Domains currently used
+            $domains = [];
+
+            foreach($cachedResult as $model) {
+                // Set properties on model
+                $model->setElementId($element->getId());
+                $model->siteId = $element->siteId;
+                if(!DomainsPlugin::getInstance()->getRelationship()->associate(
+                    $this,
+                    $model->domain,
+                    $model->getElementId(),
+                    $model->siteId
+                )) {
+                    throw new Exception("Unable to associate domain");
+                }
+
+                $domains[$model->domain] = $model->domain;
+            }
+
+            // TODO - FIND EXISTING ASSOCIATIONS
+            $oldDomains = (new DomainsQuery())
+                ->select(['domain'])
+                ->siteId($element->siteId)
+                ->elementId($element->getId())
+                ->column();
+
+            // TODO - DELETE ALL THAT ARE NOT IN $domains
+            // DISSOCIATE
+            DomainsPlugin::getInstance()->getRelationship()->dissociate(
+                $this,
+                $value->domain,
+                $element->getId(),
+                $value->siteId
+            );
+
+
+        }
 
         /* EXAMPLE
         Craft::$app->db->createCommand()

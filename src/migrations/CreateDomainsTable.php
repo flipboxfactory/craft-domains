@@ -23,7 +23,6 @@ class CreateDomainsTable extends Migration
     public function safeUp()
     {
         $this->createTable($this->tableName, [
-            'id' => $this->primaryKey(),
             'elementId' => $this->integer()->notNull(),
             'domain' => $this->string()->notNull(),
             'siteId' => $this->integer()->notNull(),
@@ -32,6 +31,15 @@ class CreateDomainsTable extends Migration
             'uid' => $this->uid(),
         ]);
 
+        $this->addPrimaryKey(
+            null,
+            $this->tableName,
+            [
+                'elementId',
+                'domain',
+                'siteId'
+            ]
+        );
         $this->createIndex(
             null,
             $this->tableName,
