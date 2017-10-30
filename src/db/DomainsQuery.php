@@ -32,8 +32,9 @@ class DomainsQuery extends Query
 
     /**
      * DomainsQuery constructor.
+     *
      * @param Domains $domains
-     * @param array $config
+     * @param array   $config
      */
     public function __construct(Domains $domains, $config = [])
     {
@@ -44,7 +45,7 @@ class DomainsQuery extends Query
             $alias = DomainsPlugin::getInstance()->getField()->getTableAlias($domains);
             $name = DomainsPlugin::getInstance()->getField()->getTableName($domains);
 
-            $this->from([$name . ' ' . $alias]);
+            $this->from([$name.' '.$alias]);
         }
     }
 
@@ -129,7 +130,7 @@ class DomainsQuery extends Query
             $element = Craft::$app->getElements()->getElementById($value);
 
             if (!$element) {
-                throw new Exception('Invalid element: ' . $value);
+                throw new Exception('Invalid element: '.$value);
             }
 
             $this->elementId = $element->getId();
@@ -216,7 +217,7 @@ class DomainsQuery extends Query
             $site = Craft::$app->getSites()->getSiteByHandle($value);
 
             if (!$site) {
-                throw new Exception('Invalid site handle: ' . $value);
+                throw new Exception('Invalid site handle: '.$value);
             }
 
             $this->siteId = $site->id;
@@ -362,6 +363,7 @@ class DomainsQuery extends Query
 
     /**
      * @param $rows
+     *
      * @return mixed
      */
     private function createModels($rows)
@@ -377,6 +379,7 @@ class DomainsQuery extends Query
 
     /**
      * @param $row
+     *
      * @return Domain
      */
     private function createModel($row): Domain
@@ -433,7 +436,7 @@ class DomainsQuery extends Query
     /**
      * Executes the query and returns a single row of result at a given offset.
      *
-     * @param int $n The offset of the row to return. If [[offset]] is set, $offset will be added to it.
+     * @param int             $n  The offset of the row to return. If [[offset]] is set, $offset will be added to it.
      * @param Connection|null $db The database connection used to generate the SQL statement.
      *                            If this parameter is not given, the `db` application component will be used.
      *

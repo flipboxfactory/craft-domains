@@ -13,15 +13,16 @@ use flipbox\domains\models\Domain;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
- * @since 1.0.0
+ * @since  1.0.0
  */
 class Associate extends Action
 {
     use traits\Save;
 
     /**
-     * @param int $elementId
+     * @param int    $elementId
      * @param string $domain
+     *
      * @return Domain
      */
     public function run(int $elementId, string $domain)
@@ -32,8 +33,9 @@ class Associate extends Action
     }
 
     /**
-     * @param int $elementId
+     * @param int    $elementId
      * @param string $domain
+     *
      * @return Domain
      */
     protected function resolve(int $elementId, string $domain)

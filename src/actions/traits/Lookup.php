@@ -14,6 +14,7 @@ trait Lookup
 {
     /**
      * @param Model $model
+     *
      * @return Model|Response
      */
     abstract public function runInternal(Model $model);
@@ -24,8 +25,9 @@ trait Lookup
     abstract protected function getField(): Domains;
 
     /**
-     * @param int $elementId
+     * @param int    $elementId
      * @param string $domain
+     *
      * @return Domain|null
      */
     protected function find(int $elementId, string $domain)
@@ -38,8 +40,9 @@ trait Lookup
     }
 
     /**
-     * @param int $elementId
+     * @param int    $elementId
      * @param string $domain
+     *
      * @return null|Model|Response
      */
     public function run(int $elementId, string $domain)

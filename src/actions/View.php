@@ -12,7 +12,7 @@ use flipbox\spark\actions\model\traits\Read;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
- * @since 1.0.0
+ * @since  1.0.0
  */
 class View extends Action
 {

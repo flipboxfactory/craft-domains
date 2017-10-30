@@ -14,7 +14,7 @@ use flipbox\spark\actions\model\traits\Delete;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
- * @since 1.0.0
+ * @since  1.0.0
  */
 class Dissociate extends Action
 {
@@ -22,6 +22,7 @@ class Dissociate extends Action
 
     /**
      * @param Domain $model
+     *
      * @return bool
      */
     protected function performAction(Domain $model): bool

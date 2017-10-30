@@ -15,7 +15,7 @@ use yii\db\QueryInterface;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
- * @since 1.0.0
+ * @since  1.0.0
  */
 class Index extends Action
 {
@@ -34,6 +34,7 @@ class Index extends Action
 
     /**
      * @param int|null $elementId
+     *
      * @return DataProviderInterface
      */
     public function run(int $elementId = null): DataProviderInterface
