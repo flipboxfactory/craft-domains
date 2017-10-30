@@ -22,6 +22,22 @@ use yii\base\Exception;
  */
 class Field extends Component
 {
+
+    /**
+     * @param Domains $field
+     * @return bool
+     */
+    public function delete(Domains $field): bool
+    {
+        Craft::$app->getDb()->createCommand()
+            ->dropTable(
+                $this->getTableName($field)
+            )
+            ->execute();
+
+        return true;
+    }
+
     /**
      * Saves a field's settings.
      *
@@ -47,7 +63,10 @@ class Field extends Component
                 if ($oldTable !== false && Craft::$app->getDb()->tableExists($oldTable)) {
                     MigrationHelper::renameTable($oldTable, $newTable);
                 } else {
-                    $this->createTable($newTable);
+                    if(!$this->createTable($newTable)) {
+                        $transaction->rollBack();
+                        return false;
+                    }
                 }
             }
 
@@ -106,7 +125,7 @@ class Field extends Component
      *
      * @param string $tableName
      *
-     * @return void
+     * @return false|null
      */
     private function createTable(string $tableName)
     {
@@ -115,7 +134,9 @@ class Field extends Component
         ]);
 
         ob_start();
-        $migration->up();
+        $result = $migration->up();
         ob_end_clean();
+
+        return $result;
     }
 }

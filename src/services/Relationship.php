@@ -58,6 +58,7 @@ class Relationship extends Component
             $field,
             $domain->domain,
             $domain->getElementId(),
+            $domain->status,
             $domain->siteId
         );
     }
@@ -124,6 +125,7 @@ class Relationship extends Component
      * @param Domains $field
      * @param string $domain
      * @param int $elementId
+     * @param string $status
      * @param int|null $siteId
      * @return bool
      */
@@ -131,12 +133,14 @@ class Relationship extends Component
         Domains $field,
         string $domain,
         int $elementId,
+        string $status,
         int $siteId = null
     ) {
         // The 'before' event
         $event = new RelationshipEvent([
             'field' => $field,
             'domain' => $domain,
+            'status' => $status,
             'elementId' => $elementId,
             'siteId' => $siteId
         ]);
@@ -159,14 +163,24 @@ class Relationship extends Component
         ];
 
         $existingRelationshipId = (new Query())
-            ->select('id')
+            ->select([
+                'elementId',
+                'domain',
+                'siteId'
+            ])
             ->from($table)
             ->where(['and', $columns])
-            ->column();
+            ->one();
+
+        $columns['status'] = $status;
 
         if ($existingRelationshipId) {
             $rows = Craft::$app->getDb()->createCommand()
-                ->update($table, $columns, ['id' => $existingRelationshipId])
+                ->update($table, $columns, [
+                    'elementId' => $existingRelationshipId['elementId'],
+                    'domain' => $existingRelationshipId['domain'],
+                    'siteId' => $existingRelationshipId['siteId']
+                ])
                 ->execute();
         } else {
             $rows = Craft::$app->getDb()->createCommand()

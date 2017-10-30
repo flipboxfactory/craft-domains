@@ -25,6 +25,11 @@ class RelationshipEvent extends CancelableEvent
     public $domain;
 
     /**
+     * @var string
+     */
+    public $status;
+
+    /**
      * @var int
      */
     public $elementId;

@@ -40,6 +40,11 @@ class Domain extends ModelWithId
     public $siteId;
 
     /**
+     * @var string|null
+     */
+    public $status;
+
+    /**
      * @return array
      */
     protected function userRules(): array
@@ -61,8 +66,14 @@ class Domain extends ModelWithId
                 'integerOnly' => true
             ],
             [
+                'status',
+                'in',
+                'range' => ['enabled','pending','disabled']
+            ],
+            [
                 [
                     'domain',
+                    'status',
                     'siteId',
                     'elementId',
                     'element'

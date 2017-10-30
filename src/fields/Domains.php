@@ -18,6 +18,7 @@ use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\models\Domain;
 use flipbox\domains\validators\UniqueValidator;
+use flipbox\spark\helpers\ArrayHelper;
 use yii\base\Exception;
 
 // TODO was recommended to not use this validator
@@ -44,15 +45,9 @@ class Domains extends Field
     public $allowLimit = true;
 
     /**
-     * @var array|null The columns that should be shown in the table
+     * @var string
      */
-    public $columns = [
-        'col1' => [
-            'heading' => 'Domain',
-            'handle' => 'domain',
-            'type' => 'singleline'
-        ]
-    ];
+    public $defaultStatus = 'pending';
 
     /**
      * @inheritdoc
@@ -87,9 +82,8 @@ class Domains extends Field
         if(($cachedResult = $value->getCachedResult()) !== null) {
             $isValid = true;
             $domains = [];
-
             foreach($cachedResult as $model) {
-                if(!$model->validate(['domain'])) {
+                if(!$model->validate(['domain', 'status'])) {
                     $isValid = false;
                 }
 
@@ -101,7 +95,7 @@ class Domains extends Field
                 // Other elements occupy this domain
 
                 // TODO - ADD WHERE NOT CURRENT ELEMENT ID (IF APPLICABLE)
-                if($elementIds = (new DomainsQuery())
+                if($elementIds = (new DomainsQuery($this))
                     ->select(['elementId'])
                     ->andWhere(['domain' => $domains])
                     ->column()
@@ -114,14 +108,14 @@ class Domains extends Field
             }
         }
 
-        if(!$isValid) {
-
-            /* ADD ERRORS EXAMPLE
-            $element->addError($this->handle, Craft::t('app', '"{filename}" is not allowed in this field.', [
-                'filename' => $filename
-            ]));*/
-
-        }
+//        if(!$isValid) {
+//
+//            /* ADD ERRORS EXAMPLE
+//            $element->addError($this->handle, Craft::t('app', '"{filename}" is not allowed in this field.', [
+//                'filename' => $filename
+//            ]));*/
+//
+//        }
     }
 
     /**
@@ -147,12 +141,22 @@ class Domains extends Field
 
                 // TODO remove everything before or after URL.com and set as submitted data
 
+                if(!is_array($val)) {
+                    $val = [
+                        'domain' => $value,
+                        'status' => $this->defaultStatus
+                    ];
+                }
+
                 $models[] = new Domain([
-                    'domain' => $val,
+                    'domain' => ArrayHelper::getValue($val, 'domain'),
+                    'status' => ArrayHelper::getValue($val, 'status'),
                     'element' => $element
                 ]);
             }
             $query->setCachedResult($models);
+        } elseif ($value === '') {
+            $query->setCachedResult([]);
         } else {
             if ($value !== '' && $element && $element->id) {
                 $query->elementId($element->id);
@@ -229,6 +233,15 @@ class Domains extends Field
         parent::afterSave($isNew);
     }
 
+    /**
+     * @inheritdoc
+     */
+    public function afterDelete()
+    {
+        DomainsPlugin::getInstance()->getField()->delete($this);
+        parent::afterDelete();
+    }
+
     public function afterElementSave(ElementInterface $element, bool $isNew)
     {
         /** @var Element $element */
@@ -245,6 +258,13 @@ class Domains extends Field
             // Domains currently used
             $domains = [];
 
+            $currentDomains = (new DomainsQuery($this))
+                ->select(['domain'])
+                ->siteId($element->siteId)
+                ->elementId($element->getId())
+                ->indexBy('domain')
+                ->column();
+
             foreach($cachedResult as $model) {
                 // Set properties on model
                 $model->setElementId($element->getId());
@@ -253,31 +273,29 @@ class Domains extends Field
                     $this,
                     $model->domain,
                     $model->getElementId(),
+                    $model->status,
                     $model->siteId
                 )) {
                     throw new Exception("Unable to associate domain");
                 }
 
                 $domains[$model->domain] = $model->domain;
+
+                ArrayHelper::remove($currentDomains, $model->domain);
             }
 
-            // TODO - FIND EXISTING ASSOCIATIONS
-            $oldDomains = (new DomainsQuery())
-                ->select(['domain'])
-                ->siteId($element->siteId)
-                ->elementId($element->getId())
-                ->column();
+            if($currentDomains) {
 
-            // TODO - DELETE ALL THAT ARE NOT IN $domains
-            // DISSOCIATE
-            DomainsPlugin::getInstance()->getRelationship()->dissociate(
-                $this,
-                $value->domain,
-                $element->getId(),
-                $value->siteId
-            );
-
-
+                // DISSOCIATE
+                foreach($currentDomains as $domain) {
+                    DomainsPlugin::getInstance()->getRelationship()->dissociate(
+                        $this,
+                        $domain,
+                        $element->getId(),
+                        $value->siteId
+                    );
+                }
+            }
         }
 
         /* EXAMPLE
@@ -295,9 +313,6 @@ class Domains extends Field
      */
     public function getInputHtml($value, ElementInterface $element = null): string
     {
-
-        var_dump($value->all());
-
         $input = '<input type="hidden" name="'.$this->handle.'" value="">';
 
         $tableHtml = $this->getTableHtml($value, $element, false);
@@ -320,7 +335,19 @@ class Domains extends Field
      */
     private function getTableHtml($value, ElementInterface $element = null, bool $static): string
     {
-        $columns = $this->columns;
+        $columns = [
+            'domain' => [
+                'heading' => 'Domain',
+                'handle' => 'domain',
+                'type' => 'singleline'
+            ],
+            'status' => [
+                'heading' => 'Heading Two',
+                'handle' => 'status',
+                'type' => 'select',
+                'options' => $this->getStatuses()
+            ]
+        ];
 
         if (!empty($columns)) {
             // Translate the column headings
@@ -332,7 +359,7 @@ class Domains extends Field
             unset($column);
 
             if ($this->isFresh($element)) {
-                $defaults = $this->defaults;
+                $defaults = [];
 
                 if (is_array($defaults)) {
                     $value = array_values($defaults);
@@ -342,18 +369,30 @@ class Domains extends Field
             $id = Craft::$app->getView()->formatInputId($this->handle);
 
             return Craft::$app->getView()->renderTemplate(
-                '_includes/forms/editableTable',
+                'domains/_components/fieldtypes/Domains/input',
                 [
                     'id' => $id,
                     'name' => $this->handle,
                     'cols' => $columns,
-                    'rows' => $value,
+                    'rows' => $value->all(),
                     'static' => $static
                 ]
             );
         }
 
         return null;
+    }
+
+    /**
+     * @return array
+     */
+    public function getStatuses(): array
+    {
+        return [
+            'enabled' => Craft::t('domains', 'Enabled'),
+            'pending' => Craft::t('domains', 'Pending'),
+            'disabled' => Craft::t('domains', 'Disabled')
+        ];
     }
 
     public static function hasContentColumn(): bool

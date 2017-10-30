@@ -25,6 +25,7 @@ class CreateDomainsTable extends Migration
         $this->createTable($this->tableName, [
             'elementId' => $this->integer()->notNull(),
             'domain' => $this->string()->notNull(),
+            'status' => $this->enum('status', ['enabled','pending','disabled'])->notNull()->defaultValue('enabled'),
             'siteId' => $this->integer()->notNull(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
@@ -44,6 +45,12 @@ class CreateDomainsTable extends Migration
             null,
             $this->tableName,
             'domain',
+            false
+        );
+        $this->createIndex(
+            null,
+            $this->tableName,
+            'status',
             false
         );
         $this->addForeignKey(
