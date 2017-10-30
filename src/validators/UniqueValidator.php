@@ -12,7 +12,7 @@ use yii\validators\UniqueValidator as BaseUniqueValidator;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
- * @since 1.0.0
+ * @since  1.0.0
  */
 class UniqueValidator extends BaseUniqueValidator
 {

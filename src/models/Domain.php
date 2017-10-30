@@ -15,7 +15,7 @@ use flipbox\spark\models\ModelWithId;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
- * @since 1.0.0
+ * @since  1.0.0
  */
 class Domain extends ModelWithId
 {
@@ -96,6 +96,7 @@ class Domain extends ModelWithId
                 (($this->element === false) || ($this->elementId !== $this->element->getId()))
             ) {
                 $this->element = null;
+
                 return $this->getElement();
             }
         }
@@ -107,12 +108,14 @@ class Domain extends ModelWithId
      * Associate an element to the element
      *
      * @param $element
+     *
      * @return $this
      */
     public function setElement($element)
     {
         if (!$this->element = $this->findElement($element)) {
             $this->elementId = null;
+
             return $this;
         }
 
@@ -125,6 +128,7 @@ class Domain extends ModelWithId
      * Associate an element to the element
      *
      * @param int $elementId
+     *
      * @return $this
      */
     public function setElementId(int $elementId)
@@ -133,6 +137,7 @@ class Domain extends ModelWithId
             $this->elementId = $elementId;
             $this->element = null;
         }
+
         return $this;
     }
 
@@ -146,6 +151,7 @@ class Domain extends ModelWithId
 
     /**
      * @param string|int|ElementInterface $identifier
+     *
      * @return ElementInterface|null
      */
     private function findElement($identifier)
@@ -153,12 +159,10 @@ class Domain extends ModelWithId
         // Element
         if ($identifier instanceof ElementInterface) {
             return $identifier;
-
-        // Id
+            // Id
         } elseif (is_numeric($identifier)) {
             return Craft::$app->getElements()->getElementById($identifier);
-
-        // Uri
+            // Uri
         } elseif (!is_null($identifier)) {
             return Craft::$app->getElements()->getElementByUri($identifier);
         }

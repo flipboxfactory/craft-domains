@@ -16,7 +16,7 @@ use yii\base\Event;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
- * @since 1.0.0
+ * @since  1.0.0
  */
 class Domains extends BasePlugin
 {
@@ -32,7 +32,7 @@ class Domains extends BasePlugin
         Event::on(
             Fields::class,
             Fields::EVENT_REGISTER_FIELD_TYPES,
-            function (RegisterComponentTypesEvent $event) {
+            function(RegisterComponentTypesEvent $event) {
                 $event->types[] = DomainsField::class;
             }
         );

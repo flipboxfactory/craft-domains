@@ -21,7 +21,7 @@ use yii\base\Exception;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
- * @since 1.0.0
+ * @since  1.0.0
  */
 class Relationship extends Component
 {
@@ -47,7 +47,8 @@ class Relationship extends Component
 
     /**
      * @param Domains $field
-     * @param Domain $domain
+     * @param Domain  $domain
+     *
      * @return bool
      */
     public function save(
@@ -64,7 +65,8 @@ class Relationship extends Component
 
     /**
      * @param Domains $field
-     * @param Domain $domain
+     * @param Domain  $domain
+     *
      * @return bool
      */
     public function delete(
@@ -80,10 +82,11 @@ class Relationship extends Component
     }
 
     /**
-     * @param Domains $field
-     * @param string $domain
-     * @param int $elementId
+     * @param Domains  $field
+     * @param string   $domain
+     * @param int      $elementId
      * @param int|null $siteId
+     *
      * @return Domain|null
      */
     public function find(
@@ -100,10 +103,11 @@ class Relationship extends Component
     }
 
     /**
-     * @param Domains $field
-     * @param string $domain
-     * @param int $elementId
+     * @param Domains  $field
+     * @param string   $domain
+     * @param int      $elementId
      * @param int|null $siteId
+     *
      * @return Domain
      * @throws Exception
      */
@@ -120,11 +124,13 @@ class Relationship extends Component
 
         return $model;
     }
+
     /**
-     * @param Domains $field
-     * @param string $domain
-     * @param int $elementId
+     * @param Domains  $field
+     * @param string   $domain
+     * @param int      $elementId
      * @param int|null $siteId
+     *
      * @return bool
      */
     public function associate(
@@ -185,10 +191,11 @@ class Relationship extends Component
     }
 
     /**
-     * @param Domains $field
-     * @param string $domain ,
-     * @param int $elementId
+     * @param Domains  $field
+     * @param string   $domain ,
+     * @param int      $elementId
      * @param int|null $siteId
+     *
      * @return bool
      */
     public function dissociate(
@@ -232,6 +239,7 @@ class Relationship extends Component
 
     /**
      * @param null $siteId
+     *
      * @return int
      */
     protected function resolveSiteId($siteId = null): int

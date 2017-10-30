@@ -24,7 +24,7 @@ use yii\base\Exception;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
- * @since 1.0.0
+ * @since  1.0.0
  */
 class Domains extends Field
 {
@@ -84,12 +84,12 @@ class Domains extends Field
         $value = $element->getFieldValue($this->handle);
 
         // If we have a cached result, let's validate them
-        if(($cachedResult = $value->getCachedResult()) !== null) {
+        if (($cachedResult = $value->getCachedResult()) !== null) {
             $isValid = true;
             $domains = [];
 
-            foreach($cachedResult as $model) {
-                if(!$model->validate(['domain'])) {
+            foreach ($cachedResult as $model) {
+                if (!$model->validate(['domain'])) {
                     $isValid = false;
                 }
 
@@ -97,11 +97,11 @@ class Domains extends Field
             }
 
             // TODO - CHECK IF EXISTS ANYWHERE ELSE (OTHER THAN PREVIOUSLY ASSOCIATED)
-            if($this->unique === true) {
+            if ($this->unique === true) {
                 // Other elements occupy this domain
 
                 // TODO - ADD WHERE NOT CURRENT ELEMENT ID (IF APPLICABLE)
-                if($elementIds = (new DomainsQuery())
+                if ($elementIds = (new DomainsQuery())
                     ->select(['elementId'])
                     ->andWhere(['domain' => $domains])
                     ->column()
@@ -114,13 +114,12 @@ class Domains extends Field
             }
         }
 
-        if(!$isValid) {
+        if (!$isValid) {
 
             /* ADD ERRORS EXAMPLE
             $element->addError($this->handle, Craft::t('app', '"{filename}" is not allowed in this field.', [
                 'filename' => $filename
             ]));*/
-
         }
     }
 
@@ -204,8 +203,8 @@ class Domains extends Field
             $operator = ($value === ':notempty:' ? '!=' : '=');
 
             $query->subQuery->andWhere(
-                "(select count([[{$alias}.id]]) from " .
-                $name .
+                "(select count([[{$alias}.id]]) from ".
+                $name.
                 " {{{$alias}}} where [[{$alias}.elementId]] = [[elements.id]]) {$operator} 0"
             );
         } else {
@@ -237,19 +236,19 @@ class Domains extends Field
         $value = $element->getFieldValue($this->handle);
 
         // TODO update domains list
-            // delete any removed
-            // upsert new/existing
+        // delete any removed
+        // upsert new/existing
 
         // If we have a cached result, let's save them
-        if(($cachedResult = $value->getCachedResult()) !== null) {
+        if (($cachedResult = $value->getCachedResult()) !== null) {
             // Domains currently used
             $domains = [];
 
-            foreach($cachedResult as $model) {
+            foreach ($cachedResult as $model) {
                 // Set properties on model
                 $model->setElementId($element->getId());
                 $model->siteId = $element->siteId;
-                if(!DomainsPlugin::getInstance()->getRelationship()->associate(
+                if (!DomainsPlugin::getInstance()->getRelationship()->associate(
                     $this,
                     $model->domain,
                     $model->getElementId(),
@@ -276,8 +275,6 @@ class Domains extends Field
                 $element->getId(),
                 $value->siteId
             );
-
-
         }
 
         /* EXAMPLE

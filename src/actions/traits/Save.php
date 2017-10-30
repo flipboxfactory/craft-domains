@@ -23,6 +23,7 @@ trait Save
 
     /**
      * @param Domain $model
+     *
      * @return bool
      */
     protected function performAction(Domain $model): bool

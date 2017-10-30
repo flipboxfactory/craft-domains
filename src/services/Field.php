@@ -18,7 +18,7 @@ use yii\base\Exception;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
- * @since 1.0.0
+ * @since  1.0.0
  */
 class Field extends Component
 {
@@ -64,22 +64,22 @@ class Field extends Component
     /**
      * Returns the content table name for a given field.
      *
-     * @param Domains $field The field.
-     * @param bool $useOldHandle Whether the method should use the field’s old handle when determining the table
+     * @param Domains $field            The field.
+     * @param bool    $useOldHandle     Whether the method should use the field’s old handle when determining the table
      *                                  name (e.g. to get the existing table name, rather than the new one).
      *
      * @return string|false The table name, or `false` if $useOldHandle was set to `true` and there was no old handle.
      */
     public function getTableName(Domains $field, bool $useOldHandle = false)
     {
-        return '{{%' . $this->getTableAlias($field, $useOldHandle) . '}}';
+        return '{{%'.$this->getTableAlias($field, $useOldHandle).'}}';
     }
 
     /**
      * Returns the content table alias for a given field.
      *
-     * @param Domains $field The field.
-     * @param bool $useOldHandle Whether the method should use the field’s old handle when determining the table
+     * @param Domains $field            The field.
+     * @param bool    $useOldHandle     Whether the method should use the field’s old handle when determining the table
      *                                  alias (e.g. to get the existing table alias, rather than the new one).
      *
      * @return string|false The table alias, or `false` if $useOldHandle was set to `true` and there was no old handle.
@@ -98,7 +98,7 @@ class Field extends Component
             $handle = $field->handle;
         }
 
-        return 'domains_' . StringHelper::toLowerCase($handle) . $name;
+        return 'domains_'.StringHelper::toLowerCase($handle).$name;
     }
 
     /**
