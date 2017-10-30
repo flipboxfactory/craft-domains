@@ -32,7 +32,7 @@ class Domains extends BasePlugin
         Event::on(
             Fields::class,
             Fields::EVENT_REGISTER_FIELD_TYPES,
-            function(RegisterComponentTypesEvent $event) {
+            function (RegisterComponentTypesEvent $event) {
                 $event->types[] = DomainsField::class;
             }
         );

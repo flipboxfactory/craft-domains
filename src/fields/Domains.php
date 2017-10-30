@@ -79,11 +79,11 @@ class Domains extends Field
         $value = $element->getFieldValue($this->handle);
 
         // If we have a cached result, let's validate them
-        if(($cachedResult = $value->getCachedResult()) !== null) {
+        if (($cachedResult = $value->getCachedResult()) !== null) {
             $isValid = true;
             $domains = [];
-            foreach($cachedResult as $model) {
-                if(!$model->validate(['domain', 'status'])) {
+            foreach ($cachedResult as $model) {
+                if (!$model->validate(['domain', 'status'])) {
                     $isValid = false;
                 }
 
@@ -91,11 +91,11 @@ class Domains extends Field
             }
 
             // TODO - CHECK IF EXISTS ANYWHERE ELSE (OTHER THAN PREVIOUSLY ASSOCIATED)
-            if($this->unique === true) {
+            if ($this->unique === true) {
                 // Other elements occupy this domain
 
                 // TODO - ADD WHERE NOT CURRENT ELEMENT ID (IF APPLICABLE)
-                if($elementIds = (new DomainsQuery($this))
+                if ($elementIds = (new DomainsQuery($this))
                     ->select(['elementId'])
                     ->andWhere(['domain' => $domains])
                     ->column()
@@ -138,10 +138,9 @@ class Domains extends Field
         if (is_array($value)) {
             $models = [];
             foreach ($value as $val) {
-
                 // TODO remove everything before or after URL.com and set as submitted data
 
-                if(!is_array($val)) {
+                if (!is_array($val)) {
                     $val = [
                         'domain' => $value,
                         'status' => $this->defaultStatus
@@ -254,7 +253,7 @@ class Domains extends Field
             // upsert new/existing
 
         // If we have a cached result, let's save them
-        if(($cachedResult = $value->getCachedResult()) !== null) {
+        if (($cachedResult = $value->getCachedResult()) !== null) {
             // Domains currently used
             $domains = [];
 
@@ -265,11 +264,11 @@ class Domains extends Field
                 ->indexBy('domain')
                 ->column();
 
-            foreach($cachedResult as $model) {
+            foreach ($cachedResult as $model) {
                 // Set properties on model
                 $model->setElementId($element->getId());
                 $model->siteId = $element->siteId;
-                if(!DomainsPlugin::getInstance()->getRelationship()->associate(
+                if (!DomainsPlugin::getInstance()->getRelationship()->associate(
                     $this,
                     $model->domain,
                     $model->getElementId(),
@@ -284,10 +283,9 @@ class Domains extends Field
                 ArrayHelper::remove($currentDomains, $model->domain);
             }
 
-            if($currentDomains) {
-
+            if ($currentDomains) {
                 // DISSOCIATE
-                foreach($currentDomains as $domain) {
+                foreach ($currentDomains as $domain) {
                     DomainsPlugin::getInstance()->getRelationship()->dissociate(
                         $this,
                         $domain,

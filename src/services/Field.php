@@ -63,7 +63,7 @@ class Field extends Component
                 if ($oldTable !== false && Craft::$app->getDb()->tableExists($oldTable)) {
                     MigrationHelper::renameTable($oldTable, $newTable);
                 } else {
-                    if(!$this->createTable($newTable)) {
+                    if (!$this->createTable($newTable)) {
                         $transaction->rollBack();
                         return false;
                     }
@@ -84,8 +84,8 @@ class Field extends Component
      * Returns the content table name for a given field.
      *
      * @param Domains $field            The field.
-     * @param bool    $useOldHandle     Whether the method should use the field’s old handle when determining the table
-     *                                  name (e.g. to get the existing table name, rather than the new one).
+     * @param bool    $useOldHandle     Whether the method should use the field’s old handle when determining the
+     *                                  table name (e.g. to get the existing table name, rather than the new one).
      *
      * @return string|false The table name, or `false` if $useOldHandle was set to `true` and there was no old handle.
      */
@@ -98,8 +98,8 @@ class Field extends Component
      * Returns the content table alias for a given field.
      *
      * @param Domains $field            The field.
-     * @param bool    $useOldHandle     Whether the method should use the field’s old handle when determining the table
-     *                                  alias (e.g. to get the existing table alias, rather than the new one).
+     * @param bool    $useOldHandle     Whether the method should use the field’s old handle when determining the
+     *                                  table alias (e.g. to get the existing table alias, rather than the new one).
      *
      * @return string|false The table alias, or `false` if $useOldHandle was set to `true` and there was no old handle.
      */
