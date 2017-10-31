@@ -90,32 +90,41 @@ class Domains extends Field
                 $domains[$model->domain] = $model->domain;
             }
 
-            // TODO - CHECK IF EXISTS ANYWHERE ELSE (OTHER THAN PREVIOUSLY ASSOCIATED)
             if ($this->unique === true) {
-                // Other elements occupy this domain
-
-                // TODO - ADD WHERE NOT CURRENT ELEMENT ID (IF APPLICABLE)
-                if ($elementIds = (new DomainsQuery($this))
+                $domainQuery = (new DomainsQuery($this))
                     ->select(['elementId'])
-                    ->andWhere(['domain' => $domains])
-                    ->column()
-                ) {
-                    /* ADD ERRORS EXAMPLE
-                    $element->addError($this->handle, Craft::t('app', '"{filename}" is not allowed in this field.', [
-                        'filename' => $filename
-                    ]));*/
+                    ->andWhere(['domain' => $domains]);
+
+                if ($existingElementId = $element->getId()) {
+                    $domainQuery->andWhere([
+                        '!=',
+                        'elementId',
+                        $existingElementId
+                    ]);
+                }
+
+                if ($elementIds = $domainQuery->column()) {
+                    // TODO - it would be really nice to indicate the domain and element that are of error
+                    $element->addError(
+                        $this->handle,
+                        Craft::t(
+                            'domains',
+                            'Domain is already in use.'
+                        )
+                    );
                 }
             }
-        }
 
-//        if(!$isValid) {
-//
-//            /* ADD ERRORS EXAMPLE
-//            $element->addError($this->handle, Craft::t('app', '"{filename}" is not allowed in this field.', [
-//                'filename' => $filename
-//            ]));*/
-//
-//        }
+            if (!$isValid) {
+                $element->addError(
+                    $this->handle,
+                    Craft::t(
+                        'domains',
+                        'Domain and status are required.'
+                    )
+                );
+            }
+        }
     }
 
     /**
@@ -340,7 +349,7 @@ class Domains extends Field
                 'type' => 'singleline'
             ],
             'status' => [
-                'heading' => 'Heading Two',
+                'heading' => 'Status',
                 'handle' => 'status',
                 'type' => 'select',
                 'options' => $this->getStatuses()
@@ -355,14 +364,6 @@ class Domains extends Field
                 }
             }
             unset($column);
-
-            if ($this->isFresh($element)) {
-                $defaults = [];
-
-                if (is_array($defaults)) {
-                    $value = array_values($defaults);
-                }
-            }
 
             $id = Craft::$app->getView()->formatInputId($this->handle);
 

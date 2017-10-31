@@ -47,12 +47,13 @@ class Domain extends ModelWithId
     /**
      * @return array
      */
-    protected function userRules(): array
+    public function rules(): array
     {
         return [
             [
                 [
                     'domain',
+                    'status',
                     'elementId'
                 ],
                 'required'
