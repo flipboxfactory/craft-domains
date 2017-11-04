@@ -149,41 +149,16 @@ class Domains extends Field
         }
 
         /** @var Element|null $element */
-        $query = new DomainsQuery($this);
-
-        // Multi-site
-        $query->siteId($this->targetSiteId($element));
+        $query = (new DomainsQuery($this))
+            ->siteId($this->targetSiteId($element));
 
         // $value will be an array of domains
         if (is_array($value)) {
-            $models = [];
-            foreach ($value as $val) {
-                if (!is_array($val)) {
-                    $val = [
-                        'domain' => $value,
-                        'status' => $this->defaultStatus
-                    ];
-                }
-
-                $models[] = new Domain(
-                    $this,
-                    [
-                        'domain' => ArrayHelper::getValue($val, 'domain'),
-                        'status' => ArrayHelper::getValue($val, 'status'),
-                        'element' => $element
-                    ]
-                );
-            }
-            $query->setCachedResult($models);
+            $this->modifyQueryInputValue($query, $value, $element);
         } elseif ($value === '') {
-            $query->setCachedResult([]);
+            $this->modifyQueryEmptyValue($query, $value, $element);
         } else {
-            if ($value !== '' && $element && $element->id) {
-                $query->elementId($element->id);
-            } else {
-                $query->elementId(false);
-                $query->domain(false);
-            }
+            $this->modifyQuery($query, $value, $element);
         }
 
         if ($this->allowLimit && $this->limit) {
@@ -191,6 +166,61 @@ class Domains extends Field
         }
 
         return $query;
+    }
+
+    /**
+     * @param $value
+     * @param ElementInterface|null $element
+     * @return DomainsQuery
+     */
+    private function modifyQueryInputValue(DomainsQuery $query, array $value, ElementInterface $element = null)
+    {
+        $models = [];
+        foreach ($value as $val) {
+            if (!is_array($val)) {
+                $val = [
+                    'domain' => $value,
+                    'status' => $this->defaultStatus
+                ];
+            }
+
+            $models[] = new Domain(
+                $this,
+                [
+                    'domain' => ArrayHelper::getValue($val, 'domain'),
+                    'status' => ArrayHelper::getValue($val, 'status'),
+                    'element' => $element
+                ]
+            );
+        }
+        $query->setCachedResult($models);
+    }
+
+    /**
+     * @param DomainsQuery $query
+     * @param string $value
+     * @param ElementInterface|null $element
+     * @return DomainsQuery
+     */
+    private function modifyQueryEmptyValue(DomainsQuery $query, string $value, ElementInterface $element = null)
+    {
+        $query->setCachedResult([]);
+    }
+
+    /**
+     * @param DomainsQuery $query
+     * @param string $value
+     * @param ElementInterface|null $element
+     * @return DomainsQuery
+     */
+    private function modifyQuery(DomainsQuery $query, string $value = null, ElementInterface $element = null)
+    {
+        if ($value !== '' && $element && $element->id) {
+            $query->elementId($element->id);
+        } else {
+            $query->elementId(false);
+            $query->domain(false);
+        }
     }
 
     /**

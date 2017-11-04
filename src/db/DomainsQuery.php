@@ -25,7 +25,7 @@ use yii\db\Connection;
 
 class DomainsQuery extends Query
 {
-    use ArrayableTrait;
+    use ArrayableTrait, traits\PopulateModel;
 
     /**
      * @var string|string[]|false|null The domain(s). Prefix domains with "not " to exclude them.
@@ -112,6 +112,22 @@ class DomainsQuery extends Query
                 $fieldService->getTableAlias($this->field).' '. $fieldService->getTableName($this->field)
             ]);
         }
+    }
+
+    /**
+     * @return Domains
+     */
+    public function getField(): Domains
+    {
+        return $this->field;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function getIndexBy()
+    {
+        return $this->indexBy;
     }
 
     /**
@@ -340,48 +356,6 @@ class DomainsQuery extends Query
         if (!empty($orderBy)) {
             $this->orderBy($orderBy);
         }
-    }
-
-    /**
-     * @inheritdoc
-     *
-     * @return ElementInterface[]|array The resulting elements.
-     */
-    public function populate($rows)
-    {
-        if (empty($rows)) {
-            return [];
-        }
-
-        return $this->createModels(
-            parent::populate($rows)
-        );
-    }
-
-    /**
-     * @param $rows
-     *
-     * @return mixed
-     */
-    private function createModels($rows)
-    {
-        $models = [];
-
-        foreach ($rows as $key => $row) {
-            $models[$key] = $this->createModel($row);
-        }
-
-        return $models;
-    }
-
-    /**
-     * @param $row
-     *
-     * @return Domain
-     */
-    private function createModel($row): Domain
-    {
-        return new Domain($this->field, $row);
     }
 
     /**
