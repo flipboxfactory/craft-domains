@@ -17,7 +17,7 @@ use yii\db\QueryInterface;
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since  1.0.0
  */
-class Index extends Action
+abstract class Index extends Action
 {
     use IndexTrait;
 

@@ -15,7 +15,7 @@ use flipbox\domains\models\Domain;
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since  1.0.0
  */
-class Associate extends Action
+abstract class Associate extends Action
 {
     use traits\Save;
 
@@ -45,10 +45,13 @@ class Associate extends Action
             $domain,
             $elementId
         )) {
-            $model = new Domain([
-                'elementId' => $elementId,
-                'domain' => $domain
-            ]);
+            $model = new Domain(
+                $this->getField(),
+                [
+                    'elementId' => $elementId,
+                    'domain' => $domain
+                ]
+            );
         }
 
         return $model;

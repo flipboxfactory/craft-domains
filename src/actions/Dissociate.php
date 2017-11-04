@@ -16,7 +16,7 @@ use flipbox\spark\actions\model\traits\Delete;
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since  1.0.0
  */
-class Dissociate extends Action
+abstract class Dissociate extends Action
 {
     use Delete, traits\Lookup;
 
@@ -27,8 +27,7 @@ class Dissociate extends Action
      */
     protected function performAction(Domain $model): bool
     {
-        return DomainsPlugin::getInstance()->getRelationship()->delete(
-            $this->getField(),
+        return DomainsPlugin::getInstance()->getRelationship()->dissociate(
             $model
         );
     }

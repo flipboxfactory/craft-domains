@@ -14,14 +14,12 @@ use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\elements\db\ElementQuery;
 use craft\elements\db\ElementQueryInterface;
+use craft\helpers\StringHelper;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\models\Domain;
-use flipbox\domains\validators\UniqueValidator;
 use flipbox\spark\helpers\ArrayHelper;
 use yii\base\Exception;
-
-// TODO was recommended to not use this validator
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
@@ -60,18 +58,26 @@ class Domains extends Field
     /**
      * @inheritdoc
      */
+    public static function hasContentColumn(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getElementValidationRules(): array
     {
         $rules = parent::getElementValidationRules();
 
         if ($this->unique) {
-            $rules[] = 'validateUniqueDomain';
+            $rules[] = 'validateDomains';
         }
 
         return $rules;
     }
 
-    public function validateUniqueDomain($element, $fieldParams)
+    public function validateDomains($element)
     {
         /** @var Element $element */
 
@@ -80,11 +86,22 @@ class Domains extends Field
 
         // If we have a cached result, let's validate them
         if (($cachedResult = $value->getCachedResult()) !== null) {
-            $isValid = true;
             $domains = [];
             foreach ($cachedResult as $model) {
                 if (!$model->validate(['domain', 'status'])) {
-                    $isValid = false;
+                    if ($model->hasErrors('domain')) {
+                        $element->addError(
+                            $this->handle,
+                            $model->getFirstError('domain')
+                        );
+                    }
+
+                    if ($model->hasErrors('status')) {
+                        $element->addError(
+                            $this->handle,
+                            $model->getFirstError('status')
+                        );
+                    }
                 }
 
                 $domains[$model->domain] = $model->domain;
@@ -92,9 +109,10 @@ class Domains extends Field
 
             if ($this->unique === true) {
                 $domainQuery = (new DomainsQuery($this))
-                    ->select(['elementId'])
+                    ->select(['elementId', 'domain'])
                     ->andWhere(['domain' => $domains]);
 
+                // Ignore this element
                 if ($existingElementId = $element->getId()) {
                     $domainQuery->andWhere([
                         '!=',
@@ -103,26 +121,19 @@ class Domains extends Field
                     ]);
                 }
 
-                if ($elementIds = $domainQuery->column()) {
-                    // TODO - it would be really nice to indicate the domain and element that are of error
+                if ($domain = $domainQuery->one()) {
                     $element->addError(
                         $this->handle,
                         Craft::t(
                             'domains',
-                            'Domain is already in use.'
+                            "Domain '{domain}' is already in use by element {elementId}.",
+                            [
+                                'domain' => $domain->domain,
+                                'elementId' => $domain->getElementId()
+                            ]
                         )
                     );
                 }
-            }
-
-            if (!$isValid) {
-                $element->addError(
-                    $this->handle,
-                    Craft::t(
-                        'domains',
-                        'Domain and status are required.'
-                    )
-                );
             }
         }
     }
@@ -147,8 +158,6 @@ class Domains extends Field
         if (is_array($value)) {
             $models = [];
             foreach ($value as $val) {
-                // TODO remove everything before or after URL.com and set as submitted data
-
                 if (!is_array($val)) {
                     $val = [
                         'domain' => $value,
@@ -156,11 +165,14 @@ class Domains extends Field
                     ];
                 }
 
-                $models[] = new Domain([
-                    'domain' => ArrayHelper::getValue($val, 'domain'),
-                    'status' => ArrayHelper::getValue($val, 'status'),
-                    'element' => $element
-                ]);
+                $models[] = new Domain(
+                    $this,
+                    [
+                        'domain' => ArrayHelper::getValue($val, 'domain'),
+                        'status' => ArrayHelper::getValue($val, 'status'),
+                        'element' => $element
+                    ]
+                );
             }
             $query->setCachedResult($models);
         } elseif ($value === '') {
@@ -211,8 +223,9 @@ class Domains extends Field
         }
 
         if ($value === ':notempty:' || $value === ':empty:') {
-            $alias = DomainsPlugin::getInstance()->getField()->getTableAlias($this);
-            $name = DomainsPlugin::getInstance()->getField()->getTableName($this);
+            $fieldService = DomainsPlugin::getInstance()->getField();
+            $alias = $fieldService->getTableAlias($this);
+            $name = $fieldService->getTableName($this);
             $operator = ($value === ':notempty:' ? '!=' : '=');
 
             $query->subQuery->andWhere(
@@ -250,6 +263,9 @@ class Domains extends Field
         parent::afterDelete();
     }
 
+    /**
+     * @inheritdoc
+     */
     public function afterElementSave(ElementInterface $element, bool $isNew)
     {
         /** @var Element $element */
@@ -257,60 +273,31 @@ class Domains extends Field
         /** @var DomainsQuery $value */
         $value = $element->getFieldValue($this->handle);
 
-        // TODO update domains list
-            // delete any removed
-            // upsert new/existing
-
         // If we have a cached result, let's save them
         if (($cachedResult = $value->getCachedResult()) !== null) {
-            // Domains currently used
-            $domains = [];
-
             $currentDomains = (new DomainsQuery($this))
-                ->select(['domain'])
                 ->siteId($element->siteId)
                 ->elementId($element->getId())
                 ->indexBy('domain')
-                ->column();
+                ->all();
 
             foreach ($cachedResult as $model) {
-                // Set properties on model
                 $model->setElementId($element->getId());
                 $model->siteId = $element->siteId;
-                if (!DomainsPlugin::getInstance()->getRelationship()->associate(
-                    $this,
-                    $model->domain,
-                    $model->getElementId(),
-                    $model->status,
-                    $model->siteId
-                )) {
+
+                if (!DomainsPlugin::getInstance()->getRelationship()->associate($model)) {
                     throw new Exception("Unable to associate domain");
                 }
-
-                $domains[$model->domain] = $model->domain;
 
                 ArrayHelper::remove($currentDomains, $model->domain);
             }
 
-            if ($currentDomains) {
-                // DISSOCIATE
-                foreach ($currentDomains as $domain) {
-                    DomainsPlugin::getInstance()->getRelationship()->dissociate(
-                        $this,
-                        $domain,
-                        $element->getId(),
-                        $value->siteId
-                    );
-                }
+            foreach ($currentDomains as $domain) {
+                DomainsPlugin::getInstance()->getRelationship()->dissociate($domain);
             }
         }
 
-        /* EXAMPLE
-        Craft::$app->db->createCommand()
-            ->upsert(...)
-            ->execute();*/
-
-        parent::afterElementSave($element, $isNew); // TODO: Change the autogenerated stub
+        parent::afterElementSave($element, $isNew);
     }
 
     /**
@@ -320,7 +307,7 @@ class Domains extends Field
      */
     public function getInputHtml($value, ElementInterface $element = null): string
     {
-        $input = '<input type="hidden" name="'.$this->handle.'" value="">';
+        $input = '<input type="hidden" name="' . $this->handle . '" value="">';
 
         $tableHtml = $this->getTableHtml($value, $element, false);
 
@@ -334,9 +321,9 @@ class Domains extends Field
     /**
      * Returns the field's input HTML.
      *
-     * @param mixed                 $value
+     * @param mixed $value
      * @param ElementInterface|null $element
-     * @param bool                  $static
+     * @param bool $static
      *
      * @return string
      */
@@ -394,13 +381,25 @@ class Domains extends Field
         ];
     }
 
-    public static function hasContentColumn(): bool
-    {
-        return false;
-    }
 
+
+    /**
+     * @param DomainsQuery|null $value
+     *
+     * @inheritdoc
+     */
     public function getSearchKeywords($value, ElementInterface $element): string
     {
-        return '';
+        if (!$value) {
+            return '';
+        }
+
+        $domains = [];
+
+        foreach ($value->all() as $domain) {
+            array_push($domains, $domain->domain);
+        }
+
+        return StringHelper::toString($domains, ' ');
     }
 }

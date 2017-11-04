@@ -25,29 +25,7 @@ use yii\db\Connection;
 
 class DomainsQuery extends Query
 {
-    // Traits
-    // =========================================================================
-
     use ArrayableTrait;
-
-    /**
-     * DomainsQuery constructor.
-     *
-     * @param Domains $domains
-     * @param array   $config
-     */
-    public function __construct(Domains $domains, $config = [])
-    {
-        parent::__construct($config);
-
-        // Set table name
-        if ($this->from === null) {
-            $alias = DomainsPlugin::getInstance()->getField()->getTableAlias($domains);
-            $name = DomainsPlugin::getInstance()->getField()->getTableName($domains);
-
-            $this->from([$name.' '.$alias]);
-        }
-    }
 
     /**
      * @var string|string[]|false|null The domain(s). Prefix domains with "not " to exclude them.
@@ -89,9 +67,6 @@ class DomainsQuery extends Query
      */
     public $orderBy = '';
 
-    // For internal use
-    // -------------------------------------------------------------------------
-
     /**
      * @var Domain[]|null The cached query result
      * @see setCachedResult()
@@ -105,6 +80,20 @@ class DomainsQuery extends Query
     private $resultCriteria;
 
     /**
+     * @var Domains
+     */
+    private $field;
+
+    /**
+     * @inheritdoc
+     */
+    public function __construct(Domains $domains, $config = [])
+    {
+        $this->field = $domains;
+        parent::__construct($config);
+    }
+
+    /**
      * @inheritdoc
      */
     public function init()
@@ -114,6 +103,14 @@ class DomainsQuery extends Query
         if ($this->select === null) {
             // Use ** as a placeholder for "all the default columns"
             $this->select = ['*'];
+        }
+
+        // Set table name
+        if ($this->from === null) {
+            $fieldService = DomainsPlugin::getInstance()->getField();
+            $this->from([
+                $fieldService->getTableAlias($this->field).' '. $fieldService->getTableName($this->field)
+            ]);
         }
     }
 
@@ -384,7 +381,7 @@ class DomainsQuery extends Query
      */
     private function createModel($row): Domain
     {
-        return new Domain($row);
+        return new Domain($this->field, $row);
     }
 
     /**

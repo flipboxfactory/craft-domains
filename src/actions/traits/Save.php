@@ -28,8 +28,7 @@ trait Save
      */
     protected function performAction(Domain $model): bool
     {
-        return DomainsPlugin::getInstance()->getRelationship()->save(
-            $this->getField(),
+        return DomainsPlugin::getInstance()->getRelationship()->associate(
             $model
         );
     }

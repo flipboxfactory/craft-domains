@@ -10,14 +10,16 @@ namespace flipbox\domains\models;
 
 use Craft;
 use craft\base\ElementInterface;
+use flipbox\domains\fields\Domains;
 use flipbox\spark\helpers\ModelHelper;
-use flipbox\spark\models\ModelWithId;
+use flipbox\spark\models\Model;
+use flipbox\domains\Domains as DomainsPlugin;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since  1.0.0
  */
-class Domain extends ModelWithId
+class Domain extends Model
 {
     /**
      * @var string
@@ -45,11 +47,25 @@ class Domain extends ModelWithId
     public $status;
 
     /**
+     * @var Domains
+     */
+    private $field;
+
+    /**
+     * @inheritdoc
+     */
+    public function __construct(Domains $field, array $config = [])
+    {
+        $this->field = $field;
+        parent::__construct($config);
+    }
+
+    /**
      * @return array
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             [
                 [
                     'domain',
@@ -67,9 +83,13 @@ class Domain extends ModelWithId
                 'integerOnly' => true
             ],
             [
+                'domain',
+                'validateDomain'
+            ],
+            [
                 'status',
                 'in',
-                'range' => ['enabled','pending','disabled']
+                'range' => array_keys($this->field->getStatuses())
             ],
             [
                 [
@@ -85,6 +105,53 @@ class Domain extends ModelWithId
                 ]
             ]
         ];
+
+        return $rules;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function isNew(): bool
+    {
+        return DomainsPlugin::getInstance()->getRelationship()->exists(
+            $this->getField(),
+            $this->domain,
+            $this->getElementId(),
+            $this->siteId
+        );
+    }
+
+    /**
+     * @param $attribute
+     */
+    public function validateDomain($attribute)
+    {
+        $value = $this->{$attribute};
+
+        if (preg_match(
+            '/^(?!\-)(?:[a-zA-Z\d\-]{0,62}[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/',
+            $value
+        ) !== 1) {
+            $this->addError(
+                $attribute,
+                Craft::t(
+                    'domains',
+                    "Invalid domain '{domain}'",
+                    [
+                        'domain' => $value
+                    ]
+                )
+            );
+        }
+    }
+
+    /**
+     * @return Domains
+     */
+    public function getField(): Domains
+    {
+        return $this->field;
     }
 
     /**
