@@ -266,7 +266,18 @@ class DomainsQuery extends Query
 
         // Build the query
         // ---------------------------------------------------------------------
+        $this->applyConditions();
+        $this->applyAuditAttributeConditions();
+        $this->applyOrderByParams($builder->db);
 
+        return parent::prepare($builder);
+    }
+
+    /**
+     *
+     */
+    private function applyConditions()
+    {
         if ($this->domain) {
             $this->andWhere(Db::parseParam('domain', $this->domain));
         }
@@ -280,7 +291,13 @@ class DomainsQuery extends Query
         } else {
             $this->siteId = Craft::$app->getSites()->currentSite->id;
         }
+    }
 
+    /**
+     *
+     */
+    private function applyAuditAttributeConditions()
+    {
         if ($this->uid) {
             $this->andWhere(Db::parseParam('uid', $this->uid));
         }
@@ -292,10 +309,6 @@ class DomainsQuery extends Query
         if ($this->dateUpdated) {
             $this->andWhere(Db::parseDateParam('dateUpdated', $this->dateUpdated));
         }
-
-        $this->applyOrderByParams($builder->db);
-
-        return parent::prepare($builder);
     }
 
     /**
@@ -315,46 +328,31 @@ class DomainsQuery extends Query
 
         // Any other empty value means we should set it
         if (empty($this->orderBy)) {
-            if ($this->fixedOrder) {
-                $domains = $this->domain;
-                if (!is_array($domains)) {
-                    $domains = is_string($domains) ? StringHelper::split($domains) : [$domains];
-                }
-
-                if (empty($domains)) {
-                    throw new QueryAbortedException;
-                }
-
-                $this->orderBy = [new FixedOrderExpression('domain', $domains, $db)];
-            } else {
-                $this->orderBy = ['dateCreated' => SORT_DESC];
-            }
+            $this->applyEmptyOrderByParams($db);
         }
 
-        if (!empty($this->orderBy)) {
-            // In case $this->orderBy was set directly instead of via orderBy()
-            $orderBy = $this->normalizeOrderBy($this->orderBy);
-            $orderByColumns = array_keys($orderBy);
+        $this->orderBy($this->orderBy);
+    }
 
-            $orderColumnMap = [];
-
-            // Prevent “1052 Column 'id' in order clause is ambiguous” MySQL error
-            $orderColumnMap['domain'] = 'domain';
-
-            foreach ($orderColumnMap as $orderValue => $columnName) {
-                // Are we ordering by this column name?
-                $pos = array_search($orderValue, $orderByColumns, true);
-
-                if ($pos !== false) {
-                    // Swap it with the mapped column name
-                    $orderByColumns[$pos] = $columnName;
-                    $orderBy = array_combine($orderByColumns, $orderBy);
-                }
+    /**
+     * @param Connection $db
+     * @throws QueryAbortedException
+     */
+    private function applyEmptyOrderByParams(Connection $db)
+    {
+        if ($this->fixedOrder) {
+            $domains = $this->domain;
+            if (!is_array($domains)) {
+                $domains = is_string($domains) ? StringHelper::split($domains) : [$domains];
             }
-        }
 
-        if (!empty($orderBy)) {
-            $this->orderBy($orderBy);
+            if (empty($domains)) {
+                throw new QueryAbortedException;
+            }
+
+            $this->orderBy = [new FixedOrderExpression('domain', $domains, $db)];
+        } else {
+            $this->orderBy = ['dateCreated' => SORT_DESC];
         }
     }
 
