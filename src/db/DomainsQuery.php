@@ -22,6 +22,7 @@ use flipbox\domains\models\Domain;
 use yii\base\ArrayableTrait;
 use yii\base\Exception;
 use yii\db\Connection;
+use craft\db\Connection as CraftConnection;
 
 class DomainsQuery extends Query
 {
@@ -43,7 +44,7 @@ class DomainsQuery extends Query
     public $uid;
 
     /**
-     * @var bool Whether results should be returned in the order specified by [[id]].
+     * @var bool Whether results should be returned in the order specified by [[domain]].
      */
     public $fixedOrder = false;
 
@@ -320,7 +321,7 @@ class DomainsQuery extends Query
      * @throws Exception if the DB connection doesn't support fixed ordering
      * @throws QueryAbortedException
      */
-    private function applyOrderByParams(Connection $db = null)
+    private function applyOrderByParams(Connection $db)
     {
         if ($this->orderBy === null) {
             return;
@@ -348,6 +349,11 @@ class DomainsQuery extends Query
 
             if (empty($domains)) {
                 throw new QueryAbortedException;
+            }
+
+            // Order the elements in the exact order that the Search service returned them in
+            if (!$db instanceof CraftConnection) {
+                throw new Exception('The database connection doesn\'t support fixed ordering.');
             }
 
             $this->orderBy = [new FixedOrderExpression('domain', $domains, $db)];
