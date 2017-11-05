@@ -8,60 +8,26 @@
 
 namespace flipbox\domains\db;
 
-use Craft;
-use craft\base\ElementInterface;
+use craft\db\Connection as CraftConnection;
 use craft\db\FixedOrderExpression;
 use craft\db\Query;
 use craft\db\QueryAbortedException;
-use craft\helpers\Db;
 use craft\helpers\StringHelper;
-use craft\models\Site;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\fields\Domains;
 use flipbox\domains\models\Domain;
 use yii\base\ArrayableTrait;
 use yii\base\Exception;
 use yii\db\Connection;
-use craft\db\Connection as CraftConnection;
 
 class DomainsQuery extends Query
 {
-    use ArrayableTrait, traits\PopulateModel;
-
-    /**
-     * @var string|string[]|false|null The domain(s). Prefix domains with "not " to exclude them.
-     */
-    public $domain;
-
-    /**
-     * @var int|int[]|false|null The element ID(s). Prefix IDs with "not " to exclude them.
-     */
-    public $elementId;
-
-    /**
-     * @var string|string[]|null The element UID(s). Prefix UIDs with "not " to exclude them.
-     */
-    public $uid;
+    use ArrayableTrait, traits\PopulateModel, traits\Attributes, traits\AuditAttributes;
 
     /**
      * @var bool Whether results should be returned in the order specified by [[domain]].
      */
     public $fixedOrder = false;
-
-    /**
-     * @var mixed When the resulting elements must have been created.
-     */
-    public $dateCreated;
-
-    /**
-     * @var mixed When the resulting elements must have been last updated.
-     */
-    public $dateUpdated;
-
-    /**
-     * @var int|null The site ID that the elements should be returned in.
-     */
-    public $siteId;
 
     /**
      * @inheritdoc
@@ -110,7 +76,7 @@ class DomainsQuery extends Query
         if ($this->from === null) {
             $fieldService = DomainsPlugin::getInstance()->getField();
             $this->from([
-                $fieldService->getTableAlias($this->field).' '. $fieldService->getTableName($this->field)
+                $fieldService->getTableAlias($this->field) . ' ' . $fieldService->getTableName($this->field)
             ]);
         }
     }
@@ -133,119 +99,11 @@ class DomainsQuery extends Query
 
     /**
      * @inheritdoc
-     * @throws Exception if $value is an invalid site handle
-     * return static
-     */
-    public function element($value)
-    {
-        if ($value instanceof ElementInterface) {
-            $this->elementId = $value->id;
-        } else {
-            $element = Craft::$app->getElements()->getElementById($value);
-
-            if (!$element) {
-                throw new Exception('Invalid element: '.$value);
-            }
-
-            $this->elementId = $element->getId();
-        }
-
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     * return static
-     */
-    public function elementId($value)
-    {
-        $this->elementId = $value;
-
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     * return static
-     */
-    public function domain($value)
-    {
-        $this->domain = $value;
-
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     * return static
-     */
-    public function uid($value)
-    {
-        $this->uid = $value;
-
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
      * return static
      */
     public function fixedOrder(bool $value = true)
     {
         $this->fixedOrder = $value;
-
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     * return static
-     */
-    public function dateCreated($value)
-    {
-        $this->dateCreated = $value;
-
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     * return static
-     */
-    public function dateUpdated($value)
-    {
-        $this->dateUpdated = $value;
-
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     * @throws Exception if $value is an invalid site handle
-     */
-    public function site($value)
-    {
-        if ($value instanceof Site) {
-            $this->siteId = $value->id;
-        } else {
-            $site = Craft::$app->getSites()->getSiteByHandle($value);
-
-            if (!$site) {
-                throw new Exception('Invalid site handle: '.$value);
-            }
-
-            $this->siteId = $site->id;
-        }
-
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function siteId(int $value = null)
-    {
-        $this->siteId = $value;
 
         return $this;
     }
@@ -272,44 +130,6 @@ class DomainsQuery extends Query
         $this->applyOrderByParams($builder->db);
 
         return parent::prepare($builder);
-    }
-
-    /**
-     *
-     */
-    private function applyConditions()
-    {
-        if ($this->domain) {
-            $this->andWhere(Db::parseParam('domain', $this->domain));
-        }
-
-        if ($this->elementId) {
-            $this->andWhere(Db::parseParam('elementId', $this->elementId));
-        }
-
-        if ($this->siteId !== null) {
-            $this->andWhere(Db::parseParam('siteId', $this->siteId));
-        } else {
-            $this->siteId = Craft::$app->getSites()->currentSite->id;
-        }
-    }
-
-    /**
-     *
-     */
-    private function applyAuditAttributeConditions()
-    {
-        if ($this->uid !== null) {
-            $this->andWhere(Db::parseParam('uid', $this->uid));
-        }
-
-        if ($this->dateCreated !== null) {
-            $this->andWhere(Db::parseDateParam('dateCreated', $this->dateCreated));
-        }
-
-        if ($this->dateUpdated !== null) {
-            $this->andWhere(Db::parseDateParam('dateUpdated', $this->dateUpdated));
-        }
     }
 
     /**
@@ -412,7 +232,7 @@ class DomainsQuery extends Query
     /**
      * Executes the query and returns a single row of result at a given offset.
      *
-     * @param int             $n  The offset of the row to return. If [[offset]] is set, $offset will be added to it.
+     * @param int $n The offset of the row to return. If [[offset]] is set, $offset will be added to it.
      * @param Connection|null $db The database connection used to generate the SQL statement.
      *                            If this parameter is not given, the `db` application component will be used.
      *
