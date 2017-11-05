@@ -33,7 +33,7 @@ class DomainsValidator extends Validator
     {
         parent::init();
 
-        if(!$this->field instanceof Domains) {
+        if (!$this->field instanceof Domains) {
             throw new Exception("Field must be an instance of 'Domains'.");
         }
     }
