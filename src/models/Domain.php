@@ -48,6 +48,11 @@ class Domain extends Model
     public $status;
 
     /**
+     * @var int|null
+     */
+    public $sortOrder;
+
+    /**
      * @var Domains
      */
     private $field;

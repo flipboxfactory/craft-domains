@@ -117,6 +117,7 @@ class Domains extends Field
     private function modifyQueryInputValue(DomainsQuery $query, array $value, ElementInterface $element = null)
     {
         $models = [];
+        $sortOrder = 0;
         foreach ($value as $val) {
             if (!is_array($val)) {
                 $val = [
@@ -130,7 +131,8 @@ class Domains extends Field
                 [
                     'domain' => ArrayHelper::getValue($val, 'domain'),
                     'status' => ArrayHelper::getValue($val, 'status'),
-                    'element' => $element
+                    'element' => $element,
+                    'sortOrder' => $sortOrder++
                 ]
             );
         }

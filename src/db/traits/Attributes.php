@@ -28,9 +28,14 @@ trait Attributes
     public $elementId;
 
     /**
-     * @var int|null The site ID that the elements should be returned in.
+     * @var int|null The site ID that the domains should be returned in.
      */
     public $siteId;
+
+    /**
+     * @var int|null Sort order
+     */
+    public $sortOrder;
 
     /**
      * Adds an additional WHERE condition to the existing one.

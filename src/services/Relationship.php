@@ -115,7 +115,10 @@ class Relationship extends Component
         );
 
         // Nothing to update
-        if ($existingDomain && $existingDomain->status === $model->status) {
+        if ($existingDomain &&
+                $existingDomain->status === $model->status &&
+                $existingDomain->sortOrder === $model->sortOrder
+        ) {
             return true;
         }
 
@@ -273,6 +276,7 @@ class Relationship extends Component
             'domain' => $model->domain,
             'elementId' => $model->getElementId(),
             'siteId' => $this->resolveSiteId($model->siteId),
+            'sortOrder' => $model->sortOrder,
             'status' => $model->status
         ];
     }

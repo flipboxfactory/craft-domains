@@ -32,7 +32,7 @@ class DomainsQuery extends Query
     /**
      * @inheritdoc
      */
-    public $orderBy = '';
+    public $orderBy = 'sortOrder';
 
     /**
      * @var Domain[]|null The cached query result
