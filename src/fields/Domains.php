@@ -18,6 +18,7 @@ use craft\helpers\StringHelper;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\models\Domain;
+use flipbox\domains\validators\DomainsValidator;
 use flipbox\spark\helpers\ArrayHelper;
 use yii\base\Exception;
 
@@ -70,72 +71,12 @@ class Domains extends Field
     {
         $rules = parent::getElementValidationRules();
 
-        if ($this->unique) {
-            $rules[] = 'validateDomains';
-        }
+        $rules[] = [
+            DomainsValidator::class,
+            'field' => $this
+        ];
 
         return $rules;
-    }
-
-    public function validateDomains($element)
-    {
-        /** @var Element $element */
-
-        /** @var DomainsQuery $value */
-        $value = $element->getFieldValue($this->handle);
-
-        // If we have a cached result, let's validate them
-        if (($cachedResult = $value->getCachedResult()) !== null) {
-            $domains = [];
-            foreach ($cachedResult as $model) {
-                if (!$model->validate(['domain', 'status'])) {
-                    if ($model->hasErrors('domain')) {
-                        $element->addError(
-                            $this->handle,
-                            $model->getFirstError('domain')
-                        );
-                    }
-
-                    if ($model->hasErrors('status')) {
-                        $element->addError(
-                            $this->handle,
-                            $model->getFirstError('status')
-                        );
-                    }
-                }
-
-                $domains[$model->domain] = $model->domain;
-            }
-
-            if ($this->unique === true) {
-                $domainQuery = (new DomainsQuery($this))
-                    ->select(['elementId', 'domain'])
-                    ->andWhere(['domain' => $domains]);
-
-                // Ignore this element
-                if ($existingElementId = $element->getId()) {
-                    $domainQuery->andWhere([
-                        '!=',
-                        'elementId',
-                        $existingElementId
-                    ]);
-                }
-
-                if ($domain = $domainQuery->one()) {
-                    $element->addError(
-                        $this->handle,
-                        Craft::t(
-                            'domains',
-                            "Domain '{domain}' is already in use by element {elementId}.",
-                            [
-                                'domain' => $domain->domain,
-                                'elementId' => $domain->getElementId()
-                            ]
-                        )
-                    );
-                }
-            }
-        }
     }
 
     /**

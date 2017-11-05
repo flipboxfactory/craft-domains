@@ -11,6 +11,7 @@ namespace flipbox\domains\models;
 use Craft;
 use craft\base\ElementInterface;
 use flipbox\domains\fields\Domains;
+use flipbox\domains\validators\DomainValidator;
 use flipbox\spark\helpers\ModelHelper;
 use flipbox\spark\models\Model;
 use flipbox\domains\Domains as DomainsPlugin;
@@ -77,14 +78,15 @@ class Domain extends Model
             [
                 [
                     'siteId',
-                    'elementId'
+                    'elementId',
+                    'sortOrder'
                 ],
                 'number',
                 'integerOnly' => true
             ],
             [
                 'domain',
-                'validateDomain'
+                DomainValidator::class
             ],
             [
                 'status',
@@ -97,7 +99,8 @@ class Domain extends Model
                     'status',
                     'siteId',
                     'elementId',
-                    'element'
+                    'element',
+                    'sortOrder'
                 ],
                 'safe',
                 'on' => [
@@ -120,30 +123,6 @@ class Domain extends Model
             $this->getElementId(),
             $this->siteId
         );
-    }
-
-    /**
-     * @param $attribute
-     */
-    public function validateDomain($attribute)
-    {
-        $value = $this->{$attribute};
-
-        if (preg_match(
-            '/^(?!\-)(?:[a-zA-Z\d\-]{0,62}[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/',
-            $value
-        ) !== 1) {
-            $this->addError(
-                $attribute,
-                Craft::t(
-                    'domains',
-                    "Invalid domain '{domain}'",
-                    [
-                        'domain' => $value
-                    ]
-                )
-            );
-        }
     }
 
     /**

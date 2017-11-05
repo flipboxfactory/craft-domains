@@ -287,7 +287,7 @@ class DomainsQuery extends Query
             $this->andWhere(Db::parseParam('elementId', $this->elementId));
         }
 
-        if ($this->siteId) {
+        if ($this->siteId !== null) {
             $this->andWhere(Db::parseParam('siteId', $this->siteId));
         } else {
             $this->siteId = Craft::$app->getSites()->currentSite->id;
@@ -299,15 +299,15 @@ class DomainsQuery extends Query
      */
     private function applyAuditAttributeConditions()
     {
-        if ($this->uid) {
+        if ($this->uid !== null) {
             $this->andWhere(Db::parseParam('uid', $this->uid));
         }
 
-        if ($this->dateCreated) {
+        if ($this->dateCreated !== null) {
             $this->andWhere(Db::parseDateParam('dateCreated', $this->dateCreated));
         }
 
-        if ($this->dateUpdated) {
+        if ($this->dateUpdated !== null) {
             $this->andWhere(Db::parseDateParam('dateUpdated', $this->dateUpdated));
         }
     }
@@ -337,6 +337,7 @@ class DomainsQuery extends Query
 
     /**
      * @param Connection $db
+     * @throws Exception
      * @throws QueryAbortedException
      */
     private function applyEmptyOrderByParams(Connection $db)

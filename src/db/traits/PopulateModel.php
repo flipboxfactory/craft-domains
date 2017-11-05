@@ -14,7 +14,6 @@ use flipbox\domains\models\Domain;
 
 trait PopulateModel
 {
-
     /**
      * @return Domains
      */
