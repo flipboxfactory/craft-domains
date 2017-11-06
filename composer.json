@@ -1,7 +1,8 @@
 {
   "name": "flipboxfactory/craft-domains",
+  "version": "1.0.0-beta",
   "description": "Element domains",
-  "minimum-stability": "dev",
+  "minimum-stability": "beta",
   "prefer-stable": true,
   "type": "craft-plugin",
   "keywords": [
