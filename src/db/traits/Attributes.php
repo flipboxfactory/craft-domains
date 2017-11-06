@@ -8,9 +8,9 @@
 
 namespace flipbox\domains\db\traits;
 
+use Craft;
 use craft\base\ElementInterface;
 use craft\helpers\Db;
-use Craft;
 use craft\models\Site;
 use yii\base\Exception;
 use yii\db\Expression;
@@ -57,12 +57,12 @@ trait Attributes
     public function element($value)
     {
         if ($value instanceof ElementInterface) {
-            $this->elementId = $value->id;
+            $this->elementId = $value->getId();
         } else {
             $element = Craft::$app->getElements()->getElementById($value);
 
             if (!$element) {
-                throw new Exception('Invalid element: '.$value);
+                throw new Exception('Invalid element: ' . $value);
             }
 
             $this->elementId = $element->getId();
@@ -105,7 +105,7 @@ trait Attributes
             $site = Craft::$app->getSites()->getSiteByHandle($value);
 
             if (!$site) {
-                throw new Exception('Invalid site handle: '.$value);
+                throw new Exception('Invalid site handle: ' . $value);
             }
 
             $this->siteId = $site->id;

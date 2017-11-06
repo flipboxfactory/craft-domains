@@ -16,13 +16,15 @@ use craft\helpers\StringHelper;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\fields\Domains;
 use flipbox\domains\models\Domain;
+use flipbox\spark\db\traits\AuditAttributes;
+use flipbox\spark\db\traits\PopulateModel;
 use yii\base\ArrayableTrait;
 use yii\base\Exception;
 use yii\db\Connection;
 
 class DomainsQuery extends Query
 {
-    use ArrayableTrait, traits\PopulateModel, traits\Attributes, traits\AuditAttributes;
+    use ArrayableTrait, PopulateModel, traits\Attributes, AuditAttributes;
 
     /**
      * @var bool Whether results should be returned in the order specified by [[domain]].
@@ -321,5 +323,15 @@ class DomainsQuery extends Query
         }
 
         return $names;
+    }
+
+    /**
+     * @param $row
+     *
+     * @return Domain
+     */
+    function createModel($row): Domain
+    {
+        return new Domain($this->getField(), $row);
     }
 }

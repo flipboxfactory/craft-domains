@@ -9,6 +9,7 @@
 namespace flipbox\domains\validators;
 
 use Craft;
+use craft\base\Element;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\fields\Domains;
 use yii\base\Exception;
@@ -43,6 +44,8 @@ class DomainsValidator extends Validator
      */
     public function validateAttribute($element, $attribute)
     {
+        /** @var Element $element */
+
         /** @var DomainsQuery $value */
         $value = $element->$attribute;
 

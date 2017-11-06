@@ -25,7 +25,7 @@ class CreateDomainsTable extends Migration
         $this->createTable($this->tableName, [
             'elementId' => $this->integer()->notNull(),
             'domain' => $this->string()->notNull(),
-            'status' => $this->enum('status', ['enabled','pending','disabled'])->notNull()->defaultValue('enabled'),
+            'status' => $this->enum('status', ['enabled', 'pending', 'disabled'])->notNull()->defaultValue('enabled'),
             'sortOrder' => $this->smallInteger()->unsigned(),
             'siteId' => $this->integer()->notNull(),
             'dateCreated' => $this->dateTime()->notNull(),

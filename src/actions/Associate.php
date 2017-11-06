@@ -20,7 +20,7 @@ abstract class Associate extends Action
     use traits\Save;
 
     /**
-     * @param int    $elementId
+     * @param int $elementId
      * @param string $domain
      *
      * @return Domain
@@ -33,7 +33,7 @@ abstract class Associate extends Action
     }
 
     /**
-     * @param int    $elementId
+     * @param int $elementId
      * @param string $domain
      *
      * @return Domain

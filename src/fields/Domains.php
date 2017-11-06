@@ -14,12 +14,12 @@ use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\elements\db\ElementQuery;
 use craft\elements\db\ElementQueryInterface;
+use craft\helpers\ArrayHelper;
 use craft\helpers\StringHelper;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\models\Domain;
 use flipbox\domains\validators\DomainsValidator;
-use flipbox\spark\helpers\ArrayHelper;
 use yii\base\Exception;
 
 /**
@@ -97,7 +97,7 @@ class Domains extends Field
         if (is_array($value)) {
             $this->modifyQueryInputValue($query, $value, $element);
         } elseif ($value === '') {
-            $this->modifyQueryEmptyValue($query, $value, $element);
+            $this->modifyQueryEmptyValue($query);
         } else {
             $this->modifyQuery($query, $value, $element);
         }
@@ -110,9 +110,9 @@ class Domains extends Field
     }
 
     /**
-     * @param $value
+     * @param DomainsQuery $query
+     * @param array $value
      * @param ElementInterface|null $element
-     * @return DomainsQuery
      */
     private function modifyQueryInputValue(DomainsQuery $query, array $value, ElementInterface $element = null)
     {
@@ -141,11 +141,8 @@ class Domains extends Field
 
     /**
      * @param DomainsQuery $query
-     * @param string $value
-     * @param ElementInterface|null $element
-     * @return DomainsQuery
      */
-    private function modifyQueryEmptyValue(DomainsQuery $query, string $value, ElementInterface $element = null)
+    private function modifyQueryEmptyValue(DomainsQuery $query)
     {
         $query->setCachedResult([]);
     }
@@ -154,12 +151,11 @@ class Domains extends Field
      * @param DomainsQuery $query
      * @param string $value
      * @param ElementInterface|null $element
-     * @return DomainsQuery
      */
     private function modifyQuery(DomainsQuery $query, string $value = null, ElementInterface $element = null)
     {
-        if ($value !== '' && $element && $element->id) {
-            $query->elementId($element->id);
+        if ($value !== '' && $element && $element->getId()) {
+            $query->elementId($element->getId());
         } else {
             $query->elementId(false);
             $query->domain(false);
@@ -353,7 +349,6 @@ class Domains extends Field
             'disabled' => Craft::t('domains', 'Disabled')
         ];
     }
-
 
 
     /**

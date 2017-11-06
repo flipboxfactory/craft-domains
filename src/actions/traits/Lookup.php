@@ -25,7 +25,7 @@ trait Lookup
     abstract protected function getField(): Domains;
 
     /**
-     * @param int    $elementId
+     * @param int $elementId
      * @param string $domain
      *
      * @return Domain|null
@@ -40,7 +40,7 @@ trait Lookup
     }
 
     /**
-     * @param int    $elementId
+     * @param int $elementId
      * @param string $domain
      *
      * @return null|Model|Response

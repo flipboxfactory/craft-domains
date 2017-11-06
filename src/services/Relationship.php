@@ -9,16 +9,11 @@
 namespace flipbox\domains\services;
 
 use Craft;
-use craft\base\ElementInterface;
-use craft\db\Query;
 use craft\events\ModelEvent;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\fields\Domains;
 use flipbox\domains\models\Domain;
-use flipbox\spark\helpers\RecordHelper;
-use flipbox\spark\services\traits\ModelDelete;
-use flipbox\spark\services\traits\ModelSave;
 use yii\base\Component;
 use yii\base\Exception;
 
@@ -42,10 +37,10 @@ class Relationship extends Component
         int $siteId = null
     ): bool {
         return (new DomainsQuery($field))
-            ->elementId($elementId)
-            ->domain($domain)
-            ->siteId($siteId)
-            ->count() > 0;
+                ->elementId($elementId)
+                ->domain($domain)
+                ->siteId($siteId)
+                ->count() > 0;
     }
 
     /**
@@ -116,8 +111,8 @@ class Relationship extends Component
 
         // Nothing to update
         if ($existingDomain &&
-                $existingDomain->status === $model->status &&
-                $existingDomain->sortOrder === $model->sortOrder
+            $existingDomain->status === $model->status &&
+            $existingDomain->sortOrder === $model->sortOrder
         ) {
             return true;
         }
@@ -239,7 +234,7 @@ class Relationship extends Component
      */
     private function updateDomain(Domain $model): bool
     {
-        return (bool) Craft::$app->getDb()->createCommand()
+        return (bool)Craft::$app->getDb()->createCommand()
             ->update(
                 DomainsPlugin::getInstance()->getField()->getTableName($model->getField()),
                 $this->upsertColumns($model),
@@ -258,7 +253,7 @@ class Relationship extends Component
      */
     private function insertDomain(Domain $domain): bool
     {
-        return (bool) Craft::$app->getDb()->createCommand()
+        return (bool)Craft::$app->getDb()->createCommand()
             ->insert(
                 DomainsPlugin::getInstance()->getField()->getTableName($domain->getField()),
                 $this->upsertColumns($domain)
