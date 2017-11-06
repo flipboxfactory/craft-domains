@@ -330,7 +330,7 @@ class DomainsQuery extends Query
      *
      * @return Domain
      */
-    function createModel($row): Domain
+    protected function createModel($row): Domain
     {
         return new Domain($this->getField(), $row);
     }
