@@ -1,5 +1,5 @@
 {
-  "name": "flipboxfactory/domains",
+  "name": "flipboxfactory/craft-domains",
   "description": "Element domains",
   "minimum-stability": "dev",
   "prefer-stable": true,
@@ -14,7 +14,7 @@
   },
   "require": {
     "craftcms/cms": "~3.0.0-beta.17",
-    "flipboxdigital/spark": "dev-develop"
+    "flipboxfactory/craft-spark": "~1.0.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^5.0",
