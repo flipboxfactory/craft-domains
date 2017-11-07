@@ -10,7 +10,7 @@ namespace flipbox\domains\actions;
 
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\models\Domain;
-use flipbox\spark\actions\model\traits\Delete;
+use flipbox\ember\actions\model\traits\Delete;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>

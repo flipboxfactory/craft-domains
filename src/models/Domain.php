@@ -9,13 +9,11 @@
 namespace flipbox\domains\models;
 
 use Craft;
-use craft\base\ElementInterface;
-use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\fields\Domains;
 use flipbox\domains\validators\DomainValidator;
-use flipbox\spark\helpers\ModelHelper;
-use flipbox\spark\models\Model;
-use flipbox\spark\traits\ElementAttribute;
+use flipbox\ember\helpers\ModelHelper;
+use flipbox\ember\models\Model;
+use flipbox\ember\traits\ElementAttribute;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>

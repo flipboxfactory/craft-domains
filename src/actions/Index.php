@@ -9,7 +9,7 @@
 namespace flipbox\domains\actions;
 
 use flipbox\domains\db\DomainsQuery;
-use flipbox\spark\actions\model\traits\Index as IndexTrait;
+use flipbox\ember\actions\model\traits\Index as IndexTrait;
 use yii\data\DataProviderInterface;
 use yii\db\QueryInterface;
 

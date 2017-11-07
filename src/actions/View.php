@@ -8,7 +8,7 @@
 
 namespace flipbox\domains\actions;
 
-use flipbox\spark\actions\model\traits\Read;
+use flipbox\ember\actions\model\traits\View as ViewTrait;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
@@ -16,5 +16,5 @@ use flipbox\spark\actions\model\traits\Read;
  */
 abstract class View extends Action
 {
-    use Read, traits\Lookup;
+    use ViewTrait, traits\Lookup;
 }

@@ -4,7 +4,7 @@ namespace flipbox\domains\actions\traits;
 
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\models\Domain;
-use flipbox\spark\actions\model\traits\Save as SaveTrait;
+use flipbox\ember\actions\model\traits\Save as SaveTrait;
 
 trait Save
 {

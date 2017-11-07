@@ -8,7 +8,7 @@
 
 namespace flipbox\domains\actions;
 
-use flipbox\spark\controllers\AbstractController;
+use flipbox\ember\controllers\AbstractController;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>

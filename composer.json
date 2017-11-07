@@ -2,7 +2,7 @@
   "name": "flipboxfactory/craft-domains",
   "version": "1.0.0-beta",
   "description": "Element domains",
-  "minimum-stability": "beta",
+  "minimum-stability": "dev",
   "prefer-stable": true,
   "type": "craft-plugin",
   "keywords": [
@@ -15,7 +15,7 @@
   },
   "require": {
     "craftcms/cms": "~3.0.0-beta.17",
-    "flipboxfactory/craft-spark": "~1.0.0"
+    "flipboxfactory/craft-ember": "dev-master"
   },
   "require-dev": {
     "phpunit/phpunit": "^5.0",
