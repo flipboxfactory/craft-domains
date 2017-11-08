@@ -99,13 +99,14 @@ class Relationship extends Component
     /**
      * Associate/Dissociate
      *
-     * @param Domains $field
      * @param DomainsQuery $query
      * @param ElementInterface $element
      * @throws Exception
      */
-    public function resolve(Domains $field, DomainsQuery $query, ElementInterface $element)
+    public function resolve(DomainsQuery $query, ElementInterface $element)
     {
+        $field = $query->getField();
+
         /** @var Element $element */
         // If we have a cached result, let's save them
         if (($cachedResult = $query->getCachedResult()) !== null) {

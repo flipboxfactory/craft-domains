@@ -238,7 +238,6 @@ class Domains extends Field
     {
         // Associate/Dissociate
         DomainsPlugin::getInstance()->getRelationship()->resolve(
-            $this,
             $element->getFieldValue($this->handle),
             $element
         );
