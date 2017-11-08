@@ -78,7 +78,7 @@ class DomainsQuery extends Query
         if ($this->from === null) {
             $fieldService = DomainsPlugin::getInstance()->getField();
             $this->from([
-                $fieldService->getTableAlias($this->field) . ' ' . $fieldService->getTableName($this->field)
+                $fieldService->getTableName($this->field) . ' ' . $fieldService->getTableAlias($this->field)
             ]);
         }
     }
