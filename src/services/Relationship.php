@@ -9,7 +9,10 @@
 namespace flipbox\domains\services;
 
 use Craft;
+use craft\base\Element;
+use craft\base\ElementInterface;
 use craft\events\ModelEvent;
+use craft\helpers\ArrayHelper;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\fields\Domains;
@@ -91,6 +94,42 @@ class Relationship extends Component
         }
 
         return $model;
+    }
+
+    /**
+     * Associate/Dissociate
+     *
+     * @param Domains $field
+     * @param DomainsQuery $query
+     * @param ElementInterface $element
+     * @throws Exception
+     */
+    public function resolve(Domains $field, DomainsQuery $query, ElementInterface $element)
+    {
+        /** @var Element $element */
+        // If we have a cached result, let's save them
+        if (($cachedResult = $query->getCachedResult()) !== null) {
+            $currentDomains = (new DomainsQuery($field))
+                ->siteId($element->siteId)
+                ->elementId($element->getId())
+                ->indexBy('domain')
+                ->all();
+
+            foreach ($cachedResult as $model) {
+                $model->setElementId($element->getId());
+                $model->siteId = $element->siteId;
+
+                if (!DomainsPlugin::getInstance()->getRelationship()->associate($model)) {
+                    throw new Exception("Unable to associate domain");
+                }
+
+                ArrayHelper::remove($currentDomains, $model->domain);
+            }
+
+            foreach ($currentDomains as $domain) {
+                DomainsPlugin::getInstance()->getRelationship()->dissociate($domain);
+            }
+        }
     }
 
     /**

@@ -20,7 +20,6 @@ use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\models\Domain;
 use flipbox\domains\validators\DomainsValidator;
-use yii\base\Exception;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
@@ -237,34 +236,12 @@ class Domains extends Field
      */
     public function afterElementSave(ElementInterface $element, bool $isNew)
     {
-        /** @var Element $element */
-
-        /** @var DomainsQuery $value */
-        $value = $element->getFieldValue($this->handle);
-
-        // If we have a cached result, let's save them
-        if (($cachedResult = $value->getCachedResult()) !== null) {
-            $currentDomains = (new DomainsQuery($this))
-                ->siteId($element->siteId)
-                ->elementId($element->getId())
-                ->indexBy('domain')
-                ->all();
-
-            foreach ($cachedResult as $model) {
-                $model->setElementId($element->getId());
-                $model->siteId = $element->siteId;
-
-                if (!DomainsPlugin::getInstance()->getRelationship()->associate($model)) {
-                    throw new Exception("Unable to associate domain");
-                }
-
-                ArrayHelper::remove($currentDomains, $model->domain);
-            }
-
-            foreach ($currentDomains as $domain) {
-                DomainsPlugin::getInstance()->getRelationship()->dissociate($domain);
-            }
-        }
+        // Associate/Dissociate
+        DomainsPlugin::getInstance()->getRelationship()->resolve(
+            $this,
+            $element->getFieldValue($this->handle),
+            $element
+        );
 
         parent::afterElementSave($element, $isNew);
     }
