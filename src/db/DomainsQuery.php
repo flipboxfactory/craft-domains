@@ -125,8 +125,8 @@ class DomainsQuery extends CacheableQuery
     {
         $row = parent::one($db);
 
-        if ($row === false) {
-            return false;
+        if ($row === false || $row instanceof Domain) {
+            return $row;
         }
 
         return $this->createObject($row);
