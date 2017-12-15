@@ -6,7 +6,7 @@
  * @link       https://www.flipboxfactory.com/software/domains/
  */
 
-namespace flipbox\domains\actions;
+namespace flipbox\domains\controllers;
 
 use flipbox\ember\controllers\AbstractController;
 
