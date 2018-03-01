@@ -126,6 +126,7 @@ class DomainsQuery extends CacheableQuery
 
     /**
      * @inheritdoc
+     * @return Domain
      */
     public function one($db = null)
     {
@@ -139,8 +140,7 @@ class DomainsQuery extends CacheableQuery
     }
 
     /**
-     * @param $row
-     *
+     * @inheritdoc
      * @return Domain
      */
     protected function createObject($row): Domain

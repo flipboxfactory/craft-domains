@@ -121,7 +121,7 @@ class Field extends Component
         $name = '';
 
         if ($useOldHandle === true) {
-            if (!$field->oldHandle) {
+            if ($field->oldHandle === null) {
                 return null;
             }
 
@@ -179,7 +179,7 @@ class Field extends Component
         foreach ($columns as &$column) {
             $heading = (string)$column['heading'];
             if ($heading !== null) {
-                $column['heading'] = Craft::t('site', $column['heading']);
+                $column['heading'] = Craft::t('site', $heading);
             }
         }
         unset($column);

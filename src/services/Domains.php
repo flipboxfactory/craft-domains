@@ -43,7 +43,7 @@ class Domains extends Component
      */
     public function findAll(DomainsField $field)
     {
-        return $this->findAllByCondition($field, null);
+        return $this->findAllByCondition($field, []);
     }
 
     /**
