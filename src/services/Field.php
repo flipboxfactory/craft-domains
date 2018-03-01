@@ -170,6 +170,7 @@ class Field extends Component
             'status' => [
                 'heading' => 'Status',
                 'handle' => 'status',
+                'class' => 'thin',
                 'type' => 'select',
                 'options' => $field->getStatuses()
             ]
