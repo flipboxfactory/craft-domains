@@ -28,18 +28,9 @@ class DomainValidator extends Validator
     protected function validateValue($value)
     {
         if ($value) {
-            if (preg_match(
-                    self::PATTERN,
-                    $value
-                ) !== 1) {
+            if (preg_match(self::PATTERN, $value) !== 1) {
                 return [
-                    Craft::t(
-                        'domains',
-                        "Invalid domain '{domain}'",
-                        [
-                            'domain' => $value
-                        ]
-                    ),
+                    Craft::t('domains', "Invalid domain '{domain}'", ['domain' => $value]),
                     []
                 ];
             }
