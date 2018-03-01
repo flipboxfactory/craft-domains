@@ -84,7 +84,8 @@ class Domains extends Component
     public function findByCondition(DomainsField $field, $condition)
     {
         return $this->findByCriteria(
-            $field, RecordHelper::conditionToCriteria($condition)
+            $field,
+            RecordHelper::conditionToCriteria($condition)
         );
     }
 
@@ -150,7 +151,8 @@ class Domains extends Component
     public function findAllByCondition(DomainsField $field, $condition = []): array
     {
         return $this->findAllByCriteria(
-            $field, RecordHelper::conditionToCriteria($condition)
+            $field,
+            RecordHelper::conditionToCriteria($condition)
         );
     }
 
