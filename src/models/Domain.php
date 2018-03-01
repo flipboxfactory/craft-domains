@@ -14,6 +14,7 @@ use flipbox\domains\validators\DomainValidator;
 use flipbox\ember\helpers\ModelHelper;
 use flipbox\ember\models\Model;
 use flipbox\ember\traits\ElementAttribute;
+use flipbox\ember\traits\SiteAttribute;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
@@ -21,17 +22,13 @@ use flipbox\ember\traits\ElementAttribute;
  */
 class Domain extends Model
 {
-    use ElementAttribute;
+    use ElementAttribute,
+        SiteAttribute;
 
     /**
      * @var string
      */
     public $domain;
-
-    /**
-     * @var int|null
-     */
-    public $siteId;
 
     /**
      * @var string|null
@@ -51,10 +48,18 @@ class Domain extends Model
     /**
      * @inheritdoc
      */
-    public function __construct(Domains $field, array $config = [])
+    public function __construct(Domains $field, $config = [])
     {
         $this->field = $field;
         parent::__construct($config);
+    }
+
+    /**
+     * @return Domains
+     */
+    public function getField(): Domains
+    {
+        return $this->field;
     }
 
     /**
@@ -108,14 +113,6 @@ class Domain extends Model
     }
 
     /**
-     * @return Domains
-     */
-    public function getField(): Domains
-    {
-        return $this->field;
-    }
-
-    /**
      * @return array
      */
     public function attributes()
@@ -123,9 +120,7 @@ class Domain extends Model
         return array_merge(
             parent::attributes(),
             $this->elementAttributes(),
-            [
-                'domain',
-            ]
+            $this->siteAttributes()
         );
     }
 
@@ -137,8 +132,11 @@ class Domain extends Model
         return array_merge(
             parent::attributeLabels(),
             $this->elementAttributeLabels(),
+            $this->siteAttributeLabels(),
             [
                 'domain' => Craft::t('domains', 'Domain'),
+                'status' => Craft::t('domains', 'Status'),
+                'sortOrder' => Craft::t('domains', 'Sort Order'),
             ]
         );
     }

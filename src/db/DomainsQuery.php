@@ -18,9 +18,16 @@ use flipbox\ember\db\traits\FixedOrderBy;
 use flipbox\ember\db\traits\PopulateObject;
 use yii\base\ArrayableTrait;
 
+/**
+ * @method Domain[] getCachedResult()
+ */
 class DomainsQuery extends CacheableQuery
 {
-    use ArrayableTrait, PopulateObject, traits\Attributes, AuditAttributes, FixedOrderBy;
+    use ArrayableTrait,
+        PopulateObject,
+        traits\Attributes,
+        AuditAttributes,
+        FixedOrderBy;
 
     /**
      * @var bool Whether results should be returned in the order specified by [[domain]].
@@ -54,7 +61,6 @@ class DomainsQuery extends CacheableQuery
         parent::init();
 
         if ($this->select === null) {
-            // Use ** as a placeholder for "all the default columns"
             $this->select = ['*'];
         }
 
@@ -125,7 +131,7 @@ class DomainsQuery extends CacheableQuery
     {
         $row = parent::one($db);
 
-        if ($row === false || $row instanceof Domain) {
+        if ($row === false || $row === null || $row instanceof Domain) {
             return $row;
         }
 

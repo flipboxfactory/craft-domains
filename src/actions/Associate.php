@@ -40,10 +40,12 @@ abstract class Associate extends Action
      */
     protected function resolve(int $elementId, string $domain)
     {
-        if (!$model = DomainsPlugin::getInstance()->getRelationship()->find(
+        if (!$model = DomainsPlugin::getInstance()->getDomains()->find(
             $this->getField(),
-            $domain,
-            $elementId
+            [
+                'domain' => $domain,
+                'elementId' => $elementId
+            ]
         )) {
             $model = new Domain(
                 $this->getField(),

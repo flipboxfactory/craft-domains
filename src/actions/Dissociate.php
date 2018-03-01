@@ -22,12 +22,12 @@ abstract class Dissociate extends Action
 
     /**
      * @param Domain $model
-     *
      * @return bool
+     * @throws \Exception
      */
     protected function performAction(Domain $model): bool
     {
-        return DomainsPlugin::getInstance()->getRelationship()->dissociate(
+        return DomainsPlugin::getInstance()->getDomainAssociations()->dissociate(
             $model
         );
     }

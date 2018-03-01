@@ -23,12 +23,12 @@ trait Save
 
     /**
      * @param Domain $model
-     *
      * @return bool
+     * @throws \Exception
      */
     protected function performAction(Domain $model): bool
     {
-        return DomainsPlugin::getInstance()->getRelationship()->associate(
+        return DomainsPlugin::getInstance()->getDomainAssociations()->associate(
             $model
         );
     }

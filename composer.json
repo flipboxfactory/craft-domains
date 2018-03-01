@@ -1,20 +1,15 @@
 {
   "name": "flipboxfactory/craft-domains",
-  "version": "1.0.1-beta",
+  "version": "1.0.0-rc",
   "description": "Element domains",
-  "minimum-stability": "beta",
-  "prefer-stable": true,
   "type": "craft-plugin",
   "keywords": [
     "flipbox",
     "craft",
     "yii2"
   ],
-  "config": {
-    "optimize-autoloader": true
-  },
   "require": {
-    "craftcms/cms": "~3.0.0",
+    "craftcms/cms": "~3.0.0.RC",
     "flipboxfactory/craft-ember": "~1.0.0.beta"
   },
   "require-dev": {
@@ -55,7 +50,8 @@
     "schemaVersion": "1.0.0",
     "components": {
       "field": "flipbox\\domains\\services\\Field",
-      "relationship": "flipbox\\domains\\services\\Relationship"
+      "domains": "flipbox\\domains\\services\\Domains",
+      "domainAssociations": "flipbox\\domains\\services\\DomainAssociations"
     }
   }
 }

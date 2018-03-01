@@ -164,17 +164,14 @@ class Domains extends Field
     /**
      * Returns the site ID that target elements should have.
      *
-     * @param ElementInterface|null $element
+     * @param ElementInterface|Element|null $element
      *
      * @return int
      */
     protected function targetSiteId(ElementInterface $element = null): int
     {
-        /** @var Element|null $element */
-        if (Craft::$app->getIsMultiSite()) {
-            if ($element !== null) {
-                return $element->siteId;
-            }
+        if (Craft::$app->getIsMultiSite() === true && $element !== null) {
+            return $element->siteId;
         }
 
         return Craft::$app->getSites()->currentSite->id;
@@ -236,8 +233,8 @@ class Domains extends Field
      */
     public function afterElementSave(ElementInterface $element, bool $isNew)
     {
-        // Associate/Dissociate
-        DomainsPlugin::getInstance()->getRelationship()->resolve(
+        DomainsPlugin::getInstance()->getDomainAssociations()->save(
+            $this,
             $element->getFieldValue($this->handle),
             $element
         );

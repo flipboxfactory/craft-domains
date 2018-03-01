@@ -140,7 +140,7 @@ trait Attributes
         if ($this->siteId !== null) {
             $this->andWhere(Db::parseParam('siteId', $this->siteId));
         } else {
-            $this->siteId = Craft::$app->getSites()->currentSite->id;
+            $this->andWhere(Db::parseParam('siteId', Craft::$app->getSites()->currentSite->id));
         }
     }
 }

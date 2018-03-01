@@ -32,10 +32,12 @@ trait Lookup
      */
     protected function find(int $elementId, string $domain)
     {
-        return DomainsPlugin::getInstance()->getRelationship()->find(
+        return DomainsPlugin::getInstance()->getDomains()->find(
             $this->getField(),
-            $domain,
-            $elementId
+            [
+                'domain' => $domain,
+                'elementId' => $elementId
+            ]
         );
     }
 
