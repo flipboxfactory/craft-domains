@@ -49,7 +49,7 @@ class DomainsValidator extends Validator
      */
     public function validateAttribute($model, $attribute)
     {
-        if ($model instanceof ElementInterface) {
+        if (!$model instanceof ElementInterface) {
             throw new Exception(sprintf(
                 "Model must be an instance of '%s'.",
                 (string)ElementInterface::class
@@ -70,7 +70,7 @@ class DomainsValidator extends Validator
         /** @var Element $element */
         $value = $element->getFieldValue($attribute);
 
-        if ($value instanceof DomainsQuery) {
+        if (!$value instanceof DomainsQuery) {
             throw new Exception(sprintf(
                 "Field value must be an instance of '%s'.",
                 (string)DomainsQuery::class
