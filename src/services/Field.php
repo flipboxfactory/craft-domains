@@ -11,7 +11,8 @@ namespace flipbox\domains\services;
 use Craft;
 use craft\helpers\MigrationHelper;
 use craft\helpers\StringHelper;
-use flipbox\domains\fields\Domains;
+use flipbox\domains\db\DomainsQuery;
+use flipbox\domains\fields\Domains as DomainsField;
 use flipbox\domains\migrations\CreateDomainsTable;
 use yii\base\Component;
 use yii\base\Exception;
@@ -22,12 +23,12 @@ use yii\base\Exception;
  */
 class Field extends Component
 {
-
     /**
-     * @param Domains $field
+     * @param DomainsField $field
      * @return bool
+     * @throws \yii\db\Exception
      */
-    public function delete(Domains $field): bool
+    public function delete(DomainsField $field): bool
     {
         Craft::$app->getDb()->createCommand()
             ->dropTable(
@@ -39,57 +40,69 @@ class Field extends Component
     }
 
     /**
-     * Saves a field's settings.
-     *
-     * @param Domains $field
-     *
-     * @return bool Whether the settings saved successfully.
-     * @throws \Exception if reasons
+     * @param DomainsField $field
+     * @return bool
+     * @throws Exception
+     * @throws \Exception
+     * @throws \Throwable
      */
-    public function saveSettings(Domains $field): bool
+    public function save(DomainsField $field): bool
+    {
+        // Create the content table first since the block type fields will need it
+        $oldTable = $this->getTableName($field, true);
+        $newTable = $this->getTableName($field);
+
+        if (null === $newTable) {
+            throw new Exception('There was a problem getting the new table name.');
+        }
+
+        if (true === Craft::$app->getDb()->tableExists($newTable)) {
+            throw new Exception('The table name is already in use.');
+        }
+
+        if (false === $this->handleTableName($newTable, $oldTable)) {
+            throw new Exception('There was a problem renaming the table.');
+        }
+
+        return true;
+    }
+
+    /**
+     * @param string $newName
+     * @param string|null $oldName
+     * @return bool
+     * @throws \Exception
+     * @throws \Throwable
+     */
+    protected function handleTableName(string $newName, string $oldName = null): bool
     {
         $transaction = Craft::$app->getDb()->beginTransaction();
         try {
-            // Create the content table first since the block type fields will need it
-            $oldTable = $this->getTableName($field, true);
-            $newTable = $this->getTableName($field);
-
-            if ($newTable === false) {
-                throw new Exception('There was a problem getting the new table name.');
+            if (null === $oldName && false === $this->createTable($newName)) {
+                $transaction->rollBack();
+                return false;
             }
 
-            // Do we need to create/rename the content table?
-            if (!Craft::$app->getDb()->tableExists($newTable)) {
-                if ($oldTable !== false && Craft::$app->getDb()->tableExists($oldTable)) {
-                    MigrationHelper::renameTable($oldTable, $newTable);
-                } else {
-                    if (!$this->createTable($newTable)) {
-                        $transaction->rollBack();
-                        return false;
-                    }
-                }
-            }
-
-            $transaction->commit();
-
-            return true;
+            MigrationHelper::renameTable($oldName, $newName);
         } catch (\Exception $e) {
             $transaction->rollBack();
-
             throw $e;
         }
+
+        $transaction->commit();
+        return true;
     }
 
     /**
      * Returns the content table name for a given field.
      *
-     * @param Domains $field The field.
+     * @param DomainsField $field The field.
      * @param bool $useOldHandle Whether the method should use the field’s old handle when determining the
-     *                                  table name (e.g. to get the existing table name, rather than the new one).
+     * table name (e.g. to get the existing table name, rather than the new one).
      *
-     * @return string|false The table name, or `false` if $useOldHandle was set to `true` and there was no old handle.
+     * @return string|null The table name, or `false` if $useOldHandle was set to `true` and there was no old handle.
      */
-    public function getTableName(Domains $field, bool $useOldHandle = false)
+    public function getTableName(DomainsField $field, bool $useOldHandle = false)
     {
         return '{{%' . $this->getTableAlias($field, $useOldHandle) . '}}';
     }
@@ -97,19 +110,19 @@ class Field extends Component
     /**
      * Returns the content table alias for a given field.
      *
-     * @param Domains $field The field.
+     * @param DomainsField $field The field.
      * @param bool $useOldHandle Whether the method should use the field’s old handle when determining the
-     *                                  table alias (e.g. to get the existing table alias, rather than the new one).
+     * table alias (e.g. to get the existing table alias, rather than the new one).
      *
-     * @return string|false The table alias, or `false` if $useOldHandle was set to `true` and there was no old handle.
+     * @return string|null The table alias, or `false` if $useOldHandle was set to `true` and there was no old handle.
      */
-    public function getTableAlias(Domains $field, bool $useOldHandle = false)
+    public function getTableAlias(DomainsField $field, bool $useOldHandle = false)
     {
         $name = '';
 
         if ($useOldHandle) {
             if (!$field->oldHandle) {
-                return false;
+                return null;
             }
 
             $handle = $field->oldHandle;
@@ -121,13 +134,11 @@ class Field extends Component
     }
 
     /**
-     * Creates the domains table for a field.
-     *
      * @param string $tableName
-     *
-     * @return false|null
+     * @return bool
+     * @throws \Throwable
      */
-    private function createTable(string $tableName)
+    private function createTable(string $tableName): bool
     {
         $migration = new CreateDomainsTable([
             'tableName' => $tableName
@@ -137,6 +148,50 @@ class Field extends Component
         $result = $migration->up();
         ob_end_clean();
 
-        return $result;
+        return false !== $result;
+    }
+
+    /**
+     * @param DomainsField $field
+     * @param DomainsQuery $query
+     * @param bool $static
+     * @return null|string
+     * @throws Exception
+     * @throws \Twig_Error_Loader
+     */
+    public function getTableHtml(DomainsField $field, DomainsQuery $query, bool $static)
+    {
+        $columns = [
+            'domain' => [
+                'heading' => 'Domain',
+                'handle' => 'domain',
+                'type' => 'singleline'
+            ],
+            'status' => [
+                'heading' => 'Status',
+                'handle' => 'status',
+                'type' => 'select',
+                'options' => $field->getStatuses()
+            ]
+        ];
+
+        // Translate the column headings
+        foreach ($columns as &$column) {
+            if (!empty($column['heading'])) {
+                $column['heading'] = Craft::t('site', $column['heading']);
+            }
+        }
+        unset($column);
+
+        return Craft::$app->getView()->renderTemplate(
+            'domains/_components/fieldtypes/Domains/input',
+            [
+                'id' => Craft::$app->getView()->formatInputId($field->handle),
+                'name' => $field->handle,
+                'cols' => $columns,
+                'rows' => $query->all(),
+                'static' => $static
+            ]
+        );
     }
 }

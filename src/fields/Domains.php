@@ -15,7 +15,6 @@ use craft\base\Field;
 use craft\elements\db\ElementQuery;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\ArrayHelper;
-use craft\helpers\StringHelper;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\models\Domain;
@@ -56,6 +55,18 @@ class Domains extends Field
     }
 
     /**
+     * @return array
+     */
+    public function getStatuses(): array
+    {
+        return [
+            'enabled' => Craft::t('domains', 'Enabled'),
+            'pending' => Craft::t('domains', 'Pending'),
+            'disabled' => Craft::t('domains', 'Disabled')
+        ];
+    }
+
+    /**
      * @inheritdoc
      */
     public static function hasContentColumn(): bool
@@ -63,119 +74,10 @@ class Domains extends Field
         return false;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function getElementValidationRules(): array
-    {
-        $rules = parent::getElementValidationRules();
 
-        $rules[] = [
-            DomainsValidator::class,
-            'field' => $this
-        ];
-
-        return $rules;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function normalizeValue($value, ElementInterface $element = null)
-    {
-        // All good
-        if ($value instanceof DomainsQuery) {
-            return $value;
-        }
-
-        /** @var Element|null $element */
-        $query = (new DomainsQuery($this))
-            ->siteId($this->targetSiteId($element));
-
-        // $value will be an array of domains
-        if (is_array($value)) {
-            $this->modifyQueryInputValue($query, $value, $element);
-        } elseif ($value === '') {
-            $this->modifyQueryEmptyValue($query);
-        } else {
-            $this->modifyQuery($query, $value, $element);
-        }
-
-        if ($this->allowLimit && $this->limit) {
-            $query->limit($this->limit);
-        }
-
-        return $query;
-    }
-
-    /**
-     * @param DomainsQuery $query
-     * @param array $value
-     * @param ElementInterface|null $element
-     */
-    private function modifyQueryInputValue(DomainsQuery $query, array $value, ElementInterface $element = null)
-    {
-        $models = [];
-        $sortOrder = 0;
-        foreach ($value as $val) {
-            if (!is_array($val)) {
-                $val = [
-                    'domain' => $value,
-                    'status' => $this->defaultStatus
-                ];
-            }
-
-            $models[] = new Domain(
-                $this,
-                [
-                    'domain' => ArrayHelper::getValue($val, 'domain'),
-                    'status' => ArrayHelper::getValue($val, 'status'),
-                    'element' => $element,
-                    'sortOrder' => $sortOrder++
-                ]
-            );
-        }
-        $query->setCachedResult($models);
-    }
-
-    /**
-     * @param DomainsQuery $query
-     */
-    private function modifyQueryEmptyValue(DomainsQuery $query)
-    {
-        $query->setCachedResult([]);
-    }
-
-    /**
-     * @param DomainsQuery $query
-     * @param string $value
-     * @param ElementInterface|null $element
-     */
-    private function modifyQuery(DomainsQuery $query, string $value = null, ElementInterface $element = null)
-    {
-        if ($value !== '' && $element && $element->getId()) {
-            $query->elementId($element->getId());
-        } else {
-            $query->elementId(false);
-            $query->domain(false);
-        }
-    }
-
-    /**
-     * Returns the site ID that target elements should have.
-     *
-     * @param ElementInterface|Element|null $element
-     *
-     * @return int
-     */
-    protected function targetSiteId(ElementInterface $element = null): int
-    {
-        if (Craft::$app->getIsMultiSite() === true && $element !== null) {
-            return $element->siteId;
-        }
-
-        return Craft::$app->getSites()->currentSite->id;
-    }
+    /*******************************************
+     * ELEMENT
+     *******************************************/
 
     /**
      * @inheritdoc
@@ -207,15 +109,163 @@ class Domains extends Field
         return null;
     }
 
-    // Events
-    // -------------------------------------------------------------------------
+    /**
+     * @inheritdoc
+     */
+    public function getElementValidationRules(): array
+    {
+        $rules = parent::getElementValidationRules();
+
+        $rules[] = [
+            DomainsValidator::class,
+            'field' => $this
+        ];
+
+        return $rules;
+    }
+
+
+    /*******************************************
+     * NORMALIZE VALUE
+     *******************************************/
+
+    /**
+     * @inheritdoc
+     */
+    public function normalizeValue($value, ElementInterface $element = null)
+    {
+        if ($value instanceof DomainsQuery) {
+            return $value;
+        }
+
+        /** @var Element|null $element */
+        $query = (new DomainsQuery($this))
+            ->siteId($this->targetSiteId($element));
+
+        // $value will be an array of domains
+        $this->normalizeQueryValue($query, $value, $element);
+
+        if ($this->allowLimit && $this->limit) {
+            $query->limit($this->limit);
+        }
+
+        return $query;
+    }
+
+    /**
+     * @param DomainsQuery $query
+     * @param $value
+     * @param ElementInterface|null $element
+     */
+    private function normalizeQueryValue(DomainsQuery $query, $value, ElementInterface $element = null)
+    {
+        if (is_array($value)) {
+            $this->normalizeQueryInputValue($query, $value, $element);
+            return;
+        }
+
+        if ($value === '') {
+            $this->normalizeQueryEmptyValue($query);
+            return;
+        }
+
+        $this->normalizeQuery($query, $value, $element);
+    }
+
+    /**
+     * @param DomainsQuery $query
+     * @param array $value
+     * @param ElementInterface|null $element
+     */
+    private function normalizeQueryInputValue(DomainsQuery $query, array $value, ElementInterface $element = null)
+    {
+        $models = [];
+        $sortOrder = 0;
+        foreach ($value as $val) {
+            if (!is_array($val)) {
+                $val = [
+                    'domain' => $value,
+                    'status' => $this->defaultStatus
+                ];
+            }
+
+            $models[] = new Domain(
+                $this,
+                [
+                    'domain' => ArrayHelper::getValue($val, 'domain'),
+                    'status' => ArrayHelper::getValue($val, 'status'),
+                    'element' => $element,
+                    'sortOrder' => $sortOrder++
+                ]
+            );
+        }
+        $query->setCachedResult($models);
+    }
+
+    /**
+     * @param DomainsQuery $query
+     */
+    private function normalizeQueryEmptyValue(DomainsQuery $query)
+    {
+        $query->setCachedResult([]);
+    }
+
+    /**
+     * @param DomainsQuery $query
+     * @param string $value
+     * @param ElementInterface|null $element
+     */
+    private function normalizeQuery(DomainsQuery $query, string $value = null, ElementInterface $element = null)
+    {
+        if ($value !== '' && $element !== null && $element->getId() !== null) {
+            $query->elementId($element->getId());
+        } else {
+            $query->elementId(false);
+            $query->domain(false);
+        }
+    }
+
+
+    /**
+     * @param DomainsQuery $value
+     * @inheritdoc
+     */
+    public function getSearchKeywords($value, ElementInterface $element): string
+    {
+        $domains = [];
+
+        foreach ($value->all() as $domain) {
+            array_push($domains, $domain->domain);
+        }
+
+        return parent::getSearchKeywords($domains, $element);
+    }
+
+
+    /*******************************************
+     * VIEWS
+     *******************************************/
+
+    /**
+     * @param DomainsQuery $value
+     * @inheritdoc
+     */
+    public function getInputHtml($value, ElementInterface $element = null): string
+    {
+        return DomainsPlugin::getInstance()->getField()->getTableHtml($this, $value, false);
+    }
+
+
+    /*******************************************
+     * EVENTS
+     *******************************************/
 
     /**
      * @inheritdoc
      */
     public function afterSave(bool $isNew)
     {
-        DomainsPlugin::getInstance()->getField()->saveSettings($this);
+        DomainsPlugin::getInstance()->getField()->save($this);
         parent::afterSave($isNew);
     }
 
@@ -242,105 +292,24 @@ class Domains extends Field
         parent::afterElementSave($element, $isNew);
     }
 
-    /**
-     * @inheritdoc
-     *
-     * @param DomainsQuery $value
-     */
-    public function getInputHtml($value, ElementInterface $element = null): string
-    {
-        $input = '<input type="hidden" name="' . $this->handle . '" value="">';
 
-        $tableHtml = $this->getTableHtml($value, $element, false);
-
-        if ($tableHtml) {
-            $input .= $tableHtml;
-        }
-
-        return $input;
-    }
+    /*******************************************
+     * UTILITIES
+     *******************************************/
 
     /**
-     * Returns the field's input HTML.
+     * Returns the site ID that target elements should have.
      *
-     * @param mixed $value
-     * @param ElementInterface|null $element
-     * @param bool $static
+     * @param ElementInterface|Element|null $element
      *
-     * @return string
+     * @return int
      */
-    private function getTableHtml($value, ElementInterface $element = null, bool $static): string
+    protected function targetSiteId(ElementInterface $element = null): int
     {
-        $columns = [
-            'domain' => [
-                'heading' => 'Domain',
-                'handle' => 'domain',
-                'type' => 'singleline'
-            ],
-            'status' => [
-                'heading' => 'Status',
-                'handle' => 'status',
-                'type' => 'select',
-                'options' => $this->getStatuses()
-            ]
-        ];
-
-        if (!empty($columns)) {
-            // Translate the column headings
-            foreach ($columns as &$column) {
-                if (!empty($column['heading'])) {
-                    $column['heading'] = Craft::t('site', $column['heading']);
-                }
-            }
-            unset($column);
-
-            $id = Craft::$app->getView()->formatInputId($this->handle);
-
-            return Craft::$app->getView()->renderTemplate(
-                'domains/_components/fieldtypes/Domains/input',
-                [
-                    'id' => $id,
-                    'name' => $this->handle,
-                    'cols' => $columns,
-                    'rows' => $value->all(),
-                    'static' => $static
-                ]
-            );
+        if (Craft::$app->getIsMultiSite() === true && $element !== null) {
+            return $element->siteId;
         }
 
-        return null;
-    }
-
-    /**
-     * @return array
-     */
-    public function getStatuses(): array
-    {
-        return [
-            'enabled' => Craft::t('domains', 'Enabled'),
-            'pending' => Craft::t('domains', 'Pending'),
-            'disabled' => Craft::t('domains', 'Disabled')
-        ];
-    }
-
-
-    /**
-     * @param DomainsQuery|null $value
-     *
-     * @inheritdoc
-     */
-    public function getSearchKeywords($value, ElementInterface $element): string
-    {
-        if (!$value) {
-            return '';
-        }
-
-        $domains = [];
-
-        foreach ($value->all() as $domain) {
-            array_push($domains, $domain->domain);
-        }
-
-        return StringHelper::toString($domains, ' ');
+        return Craft::$app->getSites()->currentSite->id;
     }
 }

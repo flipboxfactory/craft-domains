@@ -10,9 +10,12 @@ namespace flipbox\domains\validators;
 
 use Craft;
 use craft\base\Element;
+use craft\base\ElementInterface;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\fields\Domains;
+use flipbox\domains\models\Domain;
 use yii\base\Exception;
+use yii\base\Model;
 use yii\validators\Validator;
 
 /**
@@ -40,69 +43,119 @@ class DomainsValidator extends Validator
     }
 
     /**
-     * @inheritdoc
+     * @param Model $model
+     * @param string $attribute
+     * @throws Exception
      */
-    public function validateAttribute($element, $attribute)
+    public function validateAttribute($model, $attribute)
+    {
+        if ($model instanceof ElementInterface) {
+            throw new Exception(sprintf(
+                "Model must be an instance of '%s'.",
+                (string)ElementInterface::class
+            ));
+        }
+
+        /** @var ElementInterface $model */
+        $this->validateElementAttribute($model, $attribute);
+    }
+
+    /**
+     * @param ElementInterface $element
+     * @param string $attribute
+     * @throws Exception
+     */
+    protected function validateElementAttribute(ElementInterface $element, string $attribute)
     {
         /** @var Element $element */
+        $value = $element->getFieldValue($attribute);
 
-        /** @var DomainsQuery $value */
-        $value = $element->$attribute;
+        if ($value instanceof DomainsQuery) {
+            throw new Exception(sprintf(
+                "Field value must be an instance of '%s'.",
+                (string)DomainsQuery::class
+            ));
+        }
 
-        // If we have a cached result, let's validate them
-        if (($cachedResult = $value->getCachedResult()) !== null) {
+        $this->validateQuery($value, $element, $attribute);
+    }
+
+    /**
+     * @param DomainsQuery $query
+     * @param ElementInterface $element
+     * @param string $attribute
+     */
+    protected function validateQuery(DomainsQuery $query, ElementInterface $element, string $attribute)
+    {
+        if (null !== ($cachedResult = $query->getCachedResult())) {
             $domains = [];
             foreach ($cachedResult as $model) {
-                if (!$model->validate(['domain', 'status'])) {
-                    if ($model->hasErrors('domain')) {
-                        $this->addError(
-                            $element,
-                            $attribute,
-                            $model->getFirstError('domain')
-                        );
-                    }
-
-                    if ($model->hasErrors('status')) {
-                        $this->addError(
-                            $element,
-                            $attribute,
-                            $model->getFirstError('status')
-                        );
-                    }
-                }
-
+                $this->validateDomainModel($model, $element, $attribute);
                 $domains[$model->domain] = $model->domain;
             }
 
             if ($this->field->unique === true) {
-                $domainQuery = (new DomainsQuery($this->field))
-                    ->select(['elementId', 'domain'])
-                    ->andWhere(['domain' => $domains]);
-
-                // Ignore this element
-                if ($existingElementId = $element->id) {
-                    $domainQuery->andWhere([
-                        '!=',
-                        'elementId',
-                        $existingElementId
-                    ]);
-                }
-
-                if ($domain = $domainQuery->one()) {
-                    $this->addError(
-                        $element,
-                        $attribute,
-                        Craft::t(
-                            'domains',
-                            "Domain '{domain}' is already in use by element {elementId}.",
-                            [
-                                'domain' => $domain->domain,
-                                'elementId' => $domain->getElementId()
-                            ]
-                        )
-                    );
-                }
+                $this->validateUniqueDomain(array_keys($domains), $element, $attribute);
             }
+        }
+    }
+
+    /**
+     * @param Domain $domain
+     * @param ElementInterface $element
+     * @param string $attribute
+     */
+    protected function validateDomainModel(Domain $domain, ElementInterface $element, string $attribute)
+    {
+        /** @var Element $element */
+        if (!$domain->validate(['domain', 'status'])) {
+            if ($domain->hasErrors('domain')) {
+                $this->addError(
+                    $element,
+                    $attribute,
+                    $domain->getFirstError('domain')
+                );
+            }
+
+            if ($domain->hasErrors('status')) {
+                $this->addError(
+                    $element,
+                    $attribute,
+                    $domain->getFirstError('status')
+                );
+            }
+        }
+    }
+
+    protected function validateUniqueDomain(array $domains, ElementInterface $element, string $attribute)
+    {
+        /** @var Element $element */
+        $domainQuery = (new DomainsQuery($this->field))
+            ->select(['elementId', 'domain'])
+            ->andWhere(['domain' => $domains]);
+
+        // Ignore this element
+        if (null !== ($existingElementId = $element->getId())) {
+            $domainQuery->andWhere([
+                '!=',
+                'elementId',
+                $existingElementId
+            ]);
+        }
+
+        if ($domain = $domainQuery->one()) {
+            $this->addError(
+                $element,
+                $attribute,
+                Craft::t(
+                    'domains',
+                    "Domain '{domain}' is already in use by element {elementId}.",
+                    [
+                        'domain' => $domain->domain,
+                        'elementId' => $domain->getElementId()
+                    ]
+                )
+            );
         }
     }
 }

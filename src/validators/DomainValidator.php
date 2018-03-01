@@ -18,13 +18,18 @@ use yii\validators\Validator;
 class DomainValidator extends Validator
 {
     /**
+     * The Domain pattern
+     */
+    const PATTERN = '/^(?!\-)(?:[a-zA-Z\d\-]{0,62}[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/';
+
+    /**
      * @inheritdoc
      */
     protected function validateValue($value)
     {
         if ($value) {
             if (preg_match(
-                '/^(?!\-)(?:[a-zA-Z\d\-]{0,62}[a-zA-Z\d]\.){1,126}(?!\d+)[a-zA-Z\d]{1,63}$/',
+                self::PATTERN,
                 $value
             ) !== 1) {
                 return [

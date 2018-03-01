@@ -15,7 +15,7 @@ use craft\db\Query;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\events\DomainAssociationEvent;
-use flipbox\domains\fields\Domains;
+use flipbox\domains\fields\Domains as DomainsField;
 use flipbox\domains\models\Domain;
 use flipbox\ember\helpers\ArrayHelper;
 use yii\base\Component;
@@ -51,18 +51,18 @@ class DomainAssociations extends Component
     const EVENT_AFTER_DISSOCIATE = 'afterDissociate';
 
     /**
-     * @param Domains $field
+     * @param DomainsField $field
      * @param DomainsQuery $query
-     * @param ElementInterface|Element $element
+     * @param ElementInterface $element
      * @return bool
      * @throws \Exception
      */
     public function save(
-        Domains $field,
+        DomainsField $field,
         DomainsQuery $query,
         ElementInterface $element
     ) {
-        // Nothing to save
+        /** @var Element $element */
         if (null === ($models = $query->getCachedResult())) {
             return true;
         }
@@ -381,7 +381,7 @@ class DomainAssociations extends Component
      *******************************************/
 
     /**
-     * @param ElementInterface|Element $element
+     * @param ElementInterface $element
      * @param array $models
      * @param array $currentModels
      * @param array $newOrder
@@ -394,6 +394,7 @@ class DomainAssociations extends Component
         array &$currentModels,
         array &$newOrder
     ): bool {
+        /** @var Element $element */
         $ct = 1;
         foreach ($models as $model) {
             $model->setElement($element);
@@ -415,7 +416,7 @@ class DomainAssociations extends Component
     }
 
     /**
-     * @param ElementInterface|Element $element
+     * @param ElementInterface $element
      * @param array $models
      * @return bool
      * @throws \Exception
@@ -424,6 +425,7 @@ class DomainAssociations extends Component
         ElementInterface $element,
         array $models
     ): bool {
+        /** @var Element $element */
         foreach ($models as $model) {
             $model->setElement($element);
             $model->setSiteId($element->siteId);
@@ -522,12 +524,13 @@ class DomainAssociations extends Component
     }
 
     /**
-     * @param Domains $field
-     * @param ElementInterface|Element $element
+     * @param DomainsField $field
+     * @param ElementInterface $element
      * @return array|null
      */
-    protected function getCurrentDomainAssociations(Domains $field, ElementInterface $element)
+    protected function getCurrentDomainAssociations(DomainsField $field, ElementInterface $element)
     {
+        /** @var Element $element */
         return (new DomainsQuery($field))
             ->siteId($element->siteId)
             ->elementId($element->getId())
@@ -595,12 +598,13 @@ class DomainAssociations extends Component
     /**
      * @param string $tableName
      * @param array $newOrder
-     * @param ElementInterface|Element $element
+     * @param ElementInterface $element
      * @return bool
      * @throws \yii\db\Exception
      */
     private function reOrderIfChanged(string $tableName, array $newOrder, ElementInterface $element)
     {
+        /** @var Element $element */
         $currentOrder = $this->currentSortOrder($tableName, $element->getId(), $element->siteId);
 
         if ((empty($currentOrder) && empty($newOrder)) || $currentOrder == $newOrder) {
