@@ -126,14 +126,18 @@ class DomainsQuery extends CacheableQuery
 
     /**
      * @inheritdoc
-     * @return Domain
+     * @return Domain|null
      */
     public function one($db = null)
     {
         $row = parent::one($db);
 
-        if ($row === false || $row === null || $row instanceof Domain) {
+        if ($row instanceof Domain) {
             return $row;
+        }
+
+        if ($row === false || $row === null) {
+            return null;
         }
 
         return $this->createObject($row);

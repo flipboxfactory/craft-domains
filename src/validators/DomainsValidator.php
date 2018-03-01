@@ -143,6 +143,7 @@ class DomainsValidator extends Validator
             ]);
         }
 
+        /** @var Domain $domain */
         if (null !== ($domain = $domainQuery->one())) {
             $this->addError(
                 $element,

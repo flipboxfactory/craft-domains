@@ -526,7 +526,7 @@ class DomainAssociations extends Component
     /**
      * @param DomainsField $field
      * @param ElementInterface $element
-     * @return array|null
+     * @return array
      */
     protected function getCurrentDomainAssociations(DomainsField $field, ElementInterface $element): array
     {
