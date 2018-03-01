@@ -473,7 +473,7 @@ class DomainAssociations extends Component
             $tableName,
             $model->getElementId(),
             $model->getSiteId(),
-            $order
+            (array)$order
         );
     }
 
@@ -528,10 +528,10 @@ class DomainAssociations extends Component
      * @param ElementInterface $element
      * @return array|null
      */
-    protected function getCurrentDomainAssociations(DomainsField $field, ElementInterface $element)
+    protected function getCurrentDomainAssociations(DomainsField $field, ElementInterface $element): array
     {
         /** @var Element $element */
-        return (new DomainsQuery($field))
+        return (array)(new DomainsQuery($field))
             ->siteId($element->siteId)
             ->elementId($element->getId())
             ->indexBy('domain')

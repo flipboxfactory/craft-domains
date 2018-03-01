@@ -120,7 +120,7 @@ class Field extends Component
     {
         $name = '';
 
-        if ($useOldHandle) {
+        if ($useOldHandle === true) {
             if (!$field->oldHandle) {
                 return null;
             }
@@ -177,7 +177,8 @@ class Field extends Component
 
         // Translate the column headings
         foreach ($columns as &$column) {
-            if (!empty($column['heading'])) {
+            $heading = (string)$column['heading'];
+            if ($heading !== null) {
                 $column['heading'] = Craft::t('site', $column['heading']);
             }
         }

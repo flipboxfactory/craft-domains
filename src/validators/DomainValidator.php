@@ -29,9 +29,9 @@ class DomainValidator extends Validator
     {
         if ($value) {
             if (preg_match(
-                self::PATTERN,
-                $value
-            ) !== 1) {
+                    self::PATTERN,
+                    $value
+                ) !== 1) {
                 return [
                     Craft::t(
                         'domains',

@@ -95,11 +95,11 @@ class Domains extends Field
             $name = $fieldService->getTableName($this);
             $operator = ($value === ':notempty:' ? '!=' : '=');
 
-            $query->subQuery->andWhere(
+            $query->subQuery->andWhere([
                 "(select count([[{$alias}.id]]) from " .
                 $name .
                 " {{{$alias}}} where [[{$alias}.elementId]] = [[elements.id]]) {$operator} 0"
-            );
+            ]);
         } else {
             if ($value !== null) {
                 return false;
@@ -145,7 +145,7 @@ class Domains extends Field
         // $value will be an array of domains
         $this->normalizeQueryValue($query, $value, $element);
 
-        if ($this->allowLimit && $this->limit) {
+        if ($this->allowLimit === true && $this->limit !== null) {
             $query->limit($this->limit);
         }
 
@@ -306,6 +306,7 @@ class Domains extends Field
      */
     protected function targetSiteId(ElementInterface $element = null): int
     {
+        /** @var Element $element */
         if (Craft::$app->getIsMultiSite() === true && $element !== null) {
             return $element->siteId;
         }
