@@ -9,21 +9,36 @@
 namespace flipbox\domains\models;
 
 use Craft;
+use flipbox\craft\sourceTarget\models\AbstractAssociationModelWithField;
 use flipbox\domains\fields\Domains;
 use flipbox\domains\validators\DomainValidator;
 use flipbox\ember\helpers\ModelHelper;
-use flipbox\ember\models\Model;
-use flipbox\ember\traits\ElementAttribute;
-use flipbox\ember\traits\SiteAttribute;
+use flipbox\ember\traits\AuditAttributes;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since  1.0.0
+ *
+ * @property Domains $field
  */
-class Domain extends Model
+class Domain extends AbstractAssociationModelWithField
 {
-    use ElementAttribute,
-        SiteAttribute;
+    use AuditAttributes;
+
+    /**
+     * @inheritdoc
+     */
+    const TARGET_ATTRIBUTE = 'domain';
+
+    /**
+     * @inheritdoc
+     */
+    const SOURCE_ATTRIBUTE = 'elementId';
+
+    /**
+     * @var int
+     */
+    public $elementId;
 
     /**
      * @var string
@@ -36,56 +51,18 @@ class Domain extends Model
     public $status;
 
     /**
-     * @var int|null
-     */
-    public $sortOrder;
-
-    /**
-     * @var Domains
-     */
-    private $field;
-
-    /**
-     * @inheritdoc
-     */
-    public function __construct(Domains $field, $config = [])
-    {
-        $this->field = $field;
-        parent::__construct($config);
-    }
-
-    /**
-     * @return Domains
-     */
-    public function getField(): Domains
-    {
-        return $this->field;
-    }
-
-    /**
      * @return array
      */
     public function rules(): array
     {
         return array_merge(
             parent::rules(),
-            $this->elementRules(),
             [
                 [
                     [
-                        'domain',
-                        'status',
-                        'elementId'
+                        'status'
                     ],
                     'required'
-                ],
-                [
-                    [
-                        'siteId',
-                        'sortOrder'
-                    ],
-                    'number',
-                    'integerOnly' => true
                 ],
                 [
                     'domain',
@@ -98,10 +75,7 @@ class Domain extends Model
                 ],
                 [
                     [
-                        'domain',
                         'status',
-                        'siteId',
-                        'sortOrder'
                     ],
                     'safe',
                     'on' => [
@@ -118,9 +92,7 @@ class Domain extends Model
     public function attributes()
     {
         return array_merge(
-            parent::attributes(),
-            $this->elementAttributes(),
-            $this->siteAttributes()
+            parent::attributes()
         );
     }
 
@@ -131,12 +103,9 @@ class Domain extends Model
     {
         return array_merge(
             parent::attributeLabels(),
-            $this->elementAttributeLabels(),
-            $this->siteAttributeLabels(),
             [
                 'domain' => Craft::t('domains', 'Domain'),
-                'status' => Craft::t('domains', 'Status'),
-                'sortOrder' => Craft::t('domains', 'Sort Order'),
+                'status' => Craft::t('domains', 'Status')
             ]
         );
     }

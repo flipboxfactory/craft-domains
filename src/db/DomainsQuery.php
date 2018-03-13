@@ -9,77 +9,16 @@
 namespace flipbox\domains\db;
 
 use craft\db\QueryAbortedException;
-use flipbox\domains\Domains as DomainsPlugin;
-use flipbox\domains\fields\Domains;
+use flipbox\craft\sourceTarget\db\FieldAssociationsQuery;
+use flipbox\craft\sourceTarget\models\AssociationModelInterface;
 use flipbox\domains\models\Domain;
-use flipbox\ember\db\CacheableQuery;
-use flipbox\ember\db\traits\AuditAttributes;
-use flipbox\ember\db\traits\FixedOrderBy;
-use flipbox\ember\db\traits\PopulateObject;
-use yii\base\ArrayableTrait;
 
 /**
  * @method Domain[] getCachedResult()
  */
-class DomainsQuery extends CacheableQuery
+class DomainsQuery extends FieldAssociationsQuery
 {
-    use ArrayableTrait,
-        PopulateObject,
-        traits\Attributes,
-        AuditAttributes,
-        FixedOrderBy;
-
-    /**
-     * @var bool Whether results should be returned in the order specified by [[domain]].
-     */
-    public $fixedOrder = false;
-
-    /**
-     * @inheritdoc
-     */
-    public $orderBy = 'sortOrder';
-
-    /**
-     * @var Domains
-     */
-    private $field;
-
-    /**
-     * @inheritdoc
-     */
-    public function __construct(Domains $domains, $config = [])
-    {
-        $this->field = $domains;
-        parent::__construct($config);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function init()
-    {
-        parent::init();
-
-        if ($this->select === null) {
-            $this->select = ['*'];
-        }
-
-        // Set table name
-        if ($this->from === null) {
-            $fieldService = DomainsPlugin::getInstance()->getField();
-            $this->from([
-                $fieldService->getTableName($this->field) . ' ' . $fieldService->getTableAlias($this->field)
-            ]);
-        }
-    }
-
-    /**
-     * @return Domains
-     */
-    public function getField(): Domains
-    {
-        return $this->field;
-    }
+    use traits\Attributes;
 
     /**
      * @inheritdoc
@@ -91,64 +30,29 @@ class DomainsQuery extends CacheableQuery
 
     /**
      * @inheritdoc
-     * return static
-     */
-    public function fixedOrder(bool $value = true)
-    {
-        $this->fixedOrder = $value;
-
-        return $this;
-    }
-
-    // Query preparation/execution
-    // -------------------------------------------------------------------------
-
-    /**
-     * @inheritdoc
      *
      * @throws QueryAbortedException if it can be determined that there won’t be any results
      */
     public function prepare($builder)
     {
         // Is the query already doomed?
-        if ($this->domain !== null && empty($this->domain)) {
+        if (($this->elementId !== null && empty($this->elementId)) ||
+            ($this->domain !== null && empty($this->domain))
+        ) {
             throw new QueryAbortedException();
         }
 
-        // Build the query
-        // ---------------------------------------------------------------------
         $this->applyConditions();
-        $this->applyAuditAttributeConditions();
-        $this->applyOrderByParams($builder->db);
 
         return parent::prepare($builder);
     }
 
     /**
      * @inheritdoc
-     * @return Domain|null
-     */
-    public function one($db = null)
-    {
-        $row = parent::one($db);
-
-        if ($row instanceof Domain) {
-            return $row;
-        }
-
-        if ($row === false || $row === null) {
-            return null;
-        }
-
-        return $this->createObject($row);
-    }
-
-    /**
-     * @inheritdoc
      * @return Domain
      */
-    protected function createObject($row): Domain
+    protected function createObject($row): AssociationModelInterface
     {
-        return new Domain($this->getField(), $row);
+        return new Domain($this->field, $row);
     }
 }

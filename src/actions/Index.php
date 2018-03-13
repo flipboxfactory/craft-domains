@@ -9,7 +9,7 @@
 namespace flipbox\domains\actions;
 
 use flipbox\domains\db\DomainsQuery;
-use flipbox\ember\actions\model\traits\Index as IndexTrait;
+use flipbox\ember\actions\traits\Index as IndexTrait;
 use yii\data\DataProviderInterface;
 use yii\db\QueryInterface;
 
@@ -34,8 +34,9 @@ abstract class Index extends Action
 
     /**
      * @param int|null $elementId
-     *
      * @return DataProviderInterface
+     * @throws \yii\base\InvalidConfigException
+     * @throws \yii\web\HttpException
      */
     public function run(int $elementId = null): DataProviderInterface
     {
@@ -46,7 +47,7 @@ abstract class Index extends Action
         }
 
         return $this->runInternal(
-            $this->assembleDataProvider()
+            $this->createDataProvider($config)
         );
     }
 }

@@ -28,7 +28,7 @@ trait Save
      */
     protected function performAction(Domain $model): bool
     {
-        return DomainsPlugin::getInstance()->getDomainAssociations()->associate(
+        return DomainsPlugin::getInstance()->getAssociations()->associate(
             $model
         );
     }

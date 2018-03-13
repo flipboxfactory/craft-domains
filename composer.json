@@ -10,7 +10,8 @@
   ],
   "require": {
     "craftcms/cms": "~3.0.0.RC",
-    "flipboxfactory/craft-ember": "~1.0.0.rc.14"
+    "flipboxfactory/craft-ember": "~1.0.0.rc",
+    "flipboxfactory/craft-source-target": "~1.0.0-rc"
   },
   "require-dev": {
     "phpunit/phpunit": "^5.0",
@@ -51,7 +52,7 @@
     "components": {
       "field": "flipbox\\domains\\services\\Field",
       "domains": "flipbox\\domains\\services\\Domains",
-      "domainAssociations": "flipbox\\domains\\services\\DomainAssociations"
+      "associations": "flipbox\\domains\\services\\Associations"
     }
   }
 }

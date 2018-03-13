@@ -153,7 +153,7 @@ class DomainsValidator extends Validator
                     "Domain '{domain}' is already in use by element {elementId}.",
                     [
                         'domain' => $domain->domain,
-                        'elementId' => $domain->getElementId()
+                        'elementId' => $domain->elementId
                     ]
                 )
             );

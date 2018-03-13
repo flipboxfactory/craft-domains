@@ -2,21 +2,10 @@
 
 namespace flipbox\domains\migrations;
 
-use craft\db\Migration;
+use flipbox\craft\sourceTarget\migrations\SourceTargetMigrationTable;
 
-class CreateDomainsTable extends Migration
+class CreateDomainsTable extends SourceTargetMigrationTable
 {
-    // Properties
-    // =========================================================================
-
-    /**
-     * @var string|null The table name
-     */
-    public $tableName;
-
-    // Public Methods
-    // =========================================================================
-
     /**
      * @inheritdoc
      */
@@ -72,13 +61,5 @@ class CreateDomainsTable extends Migration
             'CASCADE',
             'CASCADE'
         );
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function safeDown()
-    {
-        return false;
     }
 }

@@ -15,6 +15,10 @@ use craft\base\Field;
 use craft\elements\db\ElementQuery;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\ArrayHelper;
+use flipbox\craft\sourceTarget\db\AssociationQueryInterface;
+use flipbox\craft\sourceTarget\fields\FieldAssociationInterface;
+use flipbox\craft\sourceTarget\fields\traits\NormalizeTrait;
+use flipbox\craft\sourceTarget\models\AssociationModelInterface;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\models\Domain;
@@ -24,8 +28,10 @@ use flipbox\domains\validators\DomainsValidator;
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since 1.0.0
  */
-class Domains extends Field
+class Domains extends Field implements FieldAssociationInterface
 {
+    use NormalizeTrait;
+
     /**
      * @var bool
      */
@@ -74,6 +80,46 @@ class Domains extends Field
         return false;
     }
 
+    /*******************************************
+     * TABLE
+     *******************************************/
+
+    /**
+     * @inheritdoc
+     */
+    public function getTableName(): string
+    {
+        return DomainsPlugin::getInstance()->getField()->getTableName($this);
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getTableAlias(): string
+    {
+        return DomainsPlugin::getInstance()->getField()->getTableAlias($this);
+    }
+
+
+    /*******************************************
+     * SOURCE / TARGET ATTRIBUTES
+     *******************************************/
+
+    /**
+     * @inheritdoc
+     */
+    protected function sourceAttribute(): string
+    {
+        return 'elementId';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function targetAttribute(): string
+    {
+        return 'domain';
+    }
 
     /*******************************************
      * ELEMENT
@@ -124,6 +170,14 @@ class Domains extends Field
         return $rules;
     }
 
+    /**
+     * @inheritdoc
+     * @return DomainsQuery
+     */
+    protected function newQuery(): AssociationQueryInterface
+    {
+        return new DomainsQuery($this);
+    }
 
     /*******************************************
      * NORMALIZE VALUE
@@ -138,76 +192,42 @@ class Domains extends Field
             return $value;
         }
 
-        /** @var Element|null $element */
-        $query = (new DomainsQuery($this))
-            ->siteId($this->targetSiteId($element));
-
-        // $value will be an array of domains
-        $this->normalizeQueryValue($query, $value, $element);
+        $query = $this->newQuery();
+        $query->siteId = $this->targetSiteId($element);
 
         if ($this->allowLimit === true && $this->limit !== null) {
-            $query->limit($this->limit);
+            $query->limit = $this->limit;
         }
 
+        $this->normalizeQueryValue($query, $value, $element);
         return $query;
     }
 
     /**
-     * @param DomainsQuery $query
-     * @param $value
-     * @param ElementInterface|null $element
+     * @inheritdoc
      */
-    private function normalizeQueryValue(DomainsQuery $query, $value, ElementInterface $element = null)
-    {
-        if (is_array($value)) {
-            $this->normalizeQueryInputValue($query, $value, $element);
-            return;
+    protected function normalizeQueryInputValue(
+        $value,
+        int &$sortOrder,
+        ElementInterface $element = null
+    ): AssociationModelInterface {
+        if (!is_array($value)) {
+            $value = [
+                'domain' => $value,
+                'status' => $this->defaultStatus
+            ];
         }
 
-        if ($value === '') {
-            $this->normalizeQueryEmptyValue($query);
-            return;
-        }
-
-        $this->normalizeQuery($query, $value, $element);
-    }
-
-    /**
-     * @param DomainsQuery $query
-     * @param array $value
-     * @param ElementInterface|null $element
-     */
-    private function normalizeQueryInputValue(DomainsQuery $query, array $value, ElementInterface $element = null)
-    {
-        $models = [];
-        $sortOrder = 0;
-        foreach ($value as $val) {
-            if (!is_array($val)) {
-                $val = [
-                    'domain' => $value,
-                    'status' => $this->defaultStatus
-                ];
-            }
-
-            $models[] = new Domain(
-                $this,
-                [
-                    'domain' => ArrayHelper::getValue($val, 'domain'),
-                    'status' => ArrayHelper::getValue($val, 'status'),
-                    'element' => $element,
-                    'sortOrder' => $sortOrder++
-                ]
-            );
-        }
-        $query->setCachedResult($models);
-    }
-
-    /**
-     * @param DomainsQuery $query
-     */
-    private function normalizeQueryEmptyValue(DomainsQuery $query)
-    {
-        $query->setCachedResult([]);
+        return new Domain(
+            $this,
+            [
+                Domain::TARGET_ATTRIBUTE => ArrayHelper::getValue($value, 'domain'),
+                Domain::SOURCE_ATTRIBUTE => $element ? $element->getId() : false,
+                'status' => ArrayHelper::getValue($value, 'status'),
+                'siteId' => $this->targetSiteId($element),
+                'sortOrder' => $sortOrder++
+            ]
+        );
     }
 
     /**
@@ -215,7 +235,7 @@ class Domains extends Field
      * @param string $value
      * @param ElementInterface|null $element
      */
-    private function normalizeQuery(DomainsQuery $query, string $value = null, ElementInterface $element = null)
+    protected function normalizeQuery(DomainsQuery $query, string $value = null, ElementInterface $element = null)
     {
         if ($value !== '' && $element !== null && $element->getId() !== null) {
             $query->elementId($element->getId());
@@ -283,8 +303,7 @@ class Domains extends Field
      */
     public function afterElementSave(ElementInterface $element, bool $isNew)
     {
-        DomainsPlugin::getInstance()->getDomainAssociations()->save(
-            $this,
+        DomainsPlugin::getInstance()->getAssociations()->save(
             $element->getFieldValue($this->handle),
             $element
         );

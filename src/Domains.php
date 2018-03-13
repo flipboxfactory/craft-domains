@@ -57,19 +57,11 @@ class Domains extends BasePlugin
     }
 
     /**
-     * @return services\DomainAssociations
+     * @return services\Associations
      */
-    public function getDomainAssociations()
+    public function getAssociations()
     {
-        return $this->get('domainAssociations');
-    }
-
-    /**
-     * @return services\Relationship
-     */
-    public function getRelationship()
-    {
-        return $this->get('relationship');
+        return $this->get('associations');
     }
 
     /*******************************************
