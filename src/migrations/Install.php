@@ -2,16 +2,21 @@
 
 namespace flipbox\domains\migrations;
 
-use flipbox\craft\sourceTarget\migrations\SourceTargetMigrationTable;
+use craft\db\Migration;
+use craft\records\Element;
+use craft\records\Field;
+use craft\records\Site;
+use flipbox\domains\records\Domain;
 
-class CreateDomainsTable extends SourceTargetMigrationTable
+class Install extends Migration
 {
     /**
      * @inheritdoc
      */
     public function safeUp()
     {
-        $this->createTable($this->tableName, [
+        $this->createTable(Domain::tableName(), [
+            'fieldId' => $this->integer()->notNull(),
             'elementId' => $this->integer()->notNull(),
             'domain' => $this->string()->notNull(),
             'status' => $this->enum('status', ['enabled', 'pending', 'disabled'])->notNull()->defaultValue('enabled'),
@@ -24,42 +29,65 @@ class CreateDomainsTable extends SourceTargetMigrationTable
 
         $this->addPrimaryKey(
             null,
-            $this->tableName,
+            Domain::tableName(),
             [
+                'fieldId',
                 'elementId',
                 'domain',
                 'siteId'
             ]
         );
+
         $this->createIndex(
             null,
-            $this->tableName,
+            Domain::tableName(),
             'domain',
             false
         );
+
         $this->createIndex(
             null,
-            $this->tableName,
+            Domain::tableName(),
             'status',
             false
         );
+
         $this->addForeignKey(
             null,
-            $this->tableName,
-            'elementId',
-            '{{%elements}}',
+            Domain::tableName(),
+            'fieldId',
+            Field::tableName(),
             'id',
             'CASCADE',
             null
         );
+
         $this->addForeignKey(
             null,
-            $this->tableName,
+            Domain::tableName(),
+            'elementId',
+            Element::tableName(),
+            'id',
+            'CASCADE',
+            null
+        );
+
+        $this->addForeignKey(
+            null,
+            Domain::tableName(),
             'siteId',
-            '{{%sites}}',
+            Site::tableName(),
             'id',
             'CASCADE',
             'CASCADE'
         );
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function safeDown()
+    {
+        $this->dropTableIfExists(Domain::tableName());
     }
 }

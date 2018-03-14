@@ -8,11 +8,7 @@
 
 namespace flipbox\domains\db\traits;
 
-use Craft;
-use craft\base\ElementInterface;
 use craft\helpers\Db;
-use craft\models\Site;
-use yii\base\Exception;
 use yii\db\Expression;
 
 trait Attributes
@@ -28,14 +24,9 @@ trait Attributes
     public $elementId;
 
     /**
-     * @var int|null The site ID that the domains should be returned in.
+     * @var int|int[]|false|null The field ID(s). Prefix IDs with "not " to exclude them.
      */
-    public $siteId;
-
-    /**
-     * @var int|null Sort order
-     */
-    public $sortOrder;
+    public $fieldId;
 
     /**
      * Adds an additional WHERE condition to the existing one.
@@ -50,97 +41,68 @@ trait Attributes
     abstract public function andWhere($condition, $params = []);
 
     /**
-     * @inheritdoc
-     * @throws Exception if $value is an invalid site handle
-     * return static
+     * @param $value
+     * @return static
      */
-    public function element($value)
+    public function fieldId($value)
     {
-        if ($value instanceof ElementInterface) {
-            $this->elementId = $value->getId();
-        } else {
-            $element = Craft::$app->getElements()->getElementById($value);
-
-            if (!$element) {
-                throw new Exception('Invalid element: ' . $value);
-            }
-
-            $this->elementId = $element->getId();
-        }
-
+        $this->fieldId = $value;
         return $this;
     }
 
     /**
-     * @inheritdoc
-     * return static
+     * @param $value
+     * @return static
+     */
+    public function field($value)
+    {
+        return $this->fieldId($value);
+    }
+
+    /**
+     * @param $value
+     * @return static
      */
     public function elementId($value)
     {
         $this->elementId = $value;
-
         return $this;
     }
 
     /**
-     * @inheritdoc
-     * return static
+     * @param $value
+     * @return static
+     */
+    public function element($value)
+    {
+        return $this->elementId($value);
+    }
+
+    /**
+     * @param $value
+     * @return static
      */
     public function domain($value)
     {
         $this->domain = $value;
-
         return $this;
     }
 
     /**
-     * @inheritdoc
-     * @throws Exception if $value is an invalid site handle
-     */
-    public function site($value)
-    {
-        if ($value instanceof Site) {
-            $this->siteId = $value->id;
-        } else {
-            $site = Craft::$app->getSites()->getSiteByHandle($value);
-
-            if (!$site) {
-                throw new Exception('Invalid site handle: ' . $value);
-            }
-
-            $this->siteId = $site->id;
-        }
-
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function siteId(int $value = null)
-    {
-        $this->siteId = $value;
-
-        return $this;
-    }
-
-    /**
-     *
+     * Apply attribute conditions
      */
     protected function applyConditions()
     {
-        if ($this->domain) {
+        if ($this->fieldId !== null) {
+            $this->andWhere(Db::parseParam('fieldId', $this->fieldId));
+        }
+
+        if ($this->domain !== null) {
             $this->andWhere(Db::parseParam('domain', $this->domain));
         }
 
-        if ($this->elementId) {
+        if ($this->elementId !== null) {
             $this->andWhere(Db::parseParam('elementId', $this->elementId));
-        }
-
-        if ($this->siteId !== null) {
-            $this->andWhere(Db::parseParam('siteId', $this->siteId));
-        } else {
-            $this->andWhere(Db::parseParam('siteId', Craft::$app->getSites()->currentSite->id));
         }
     }
 }

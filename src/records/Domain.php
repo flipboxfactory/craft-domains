@@ -6,24 +6,30 @@
  * @link       https://www.flipboxfactory.com/software/domains/
  */
 
-namespace flipbox\domains\models;
+namespace flipbox\domains\records;
 
 use Craft;
-use flipbox\craft\sourceTarget\models\AbstractAssociationModelWithField;
+use flipbox\craft\sourceTarget\records\AssociationsRecord;
+use flipbox\domains\db\DomainsQuery;
+use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\fields\Domains;
 use flipbox\domains\validators\DomainValidator;
 use flipbox\ember\helpers\ModelHelper;
-use flipbox\ember\traits\AuditAttributes;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since  1.0.0
  *
- * @property Domains $field
+ * @property int $fieldId
+ * @property string $domain
+ * @property int $elementId
  */
-class Domain extends AbstractAssociationModelWithField
+class Domain extends AssociationsRecord
 {
-    use AuditAttributes;
+    /**
+     * @inheritdoc
+     */
+    const TABLE_ALIAS = 'domains';
 
     /**
      * @inheritdoc
@@ -36,19 +42,38 @@ class Domain extends AbstractAssociationModelWithField
     const SOURCE_ATTRIBUTE = 'elementId';
 
     /**
-     * @var int
+     * {@inheritdoc}
+     * @return DomainsQuery
      */
-    public $elementId;
+    public static function find()
+    {
+        return Craft::createObject(
+            DomainsQuery::class,
+            [get_called_class()]
+        );
+    }
 
     /**
-     * @var string
+     * @inheritdoc
      */
-    public $domain;
+    public function associate(bool $autoReorder = true): bool
+    {
+        return DomainsPlugin::getInstance()->getAssociations()->associate(
+            $this,
+            $autoReorder
+        );
+    }
 
     /**
-     * @var string|null
+     * @inheritdoc
      */
-    public $status;
+    public function dissociate(bool $autoReorder = true): bool
+    {
+        return DomainsPlugin::getInstance()->getAssociations()->dissociate(
+            $this,
+            $autoReorder
+        );
+    }
 
     /**
      * @return array
@@ -60,9 +85,17 @@ class Domain extends AbstractAssociationModelWithField
             [
                 [
                     [
-                        'status'
+                        'status',
+                        'fieldId',
                     ],
                     'required'
+                ],
+                [
+                    [
+                        'fieldId'
+                    ],
+                    'number',
+                    'integerOnly' => true
                 ],
                 [
                     'domain',
@@ -71,10 +104,11 @@ class Domain extends AbstractAssociationModelWithField
                 [
                     'status',
                     'in',
-                    'range' => array_keys($this->field->getStatuses())
+                    'range' => array_keys(Domains::getStatuses())
                 ],
                 [
                     [
+                        'fieldId',
                         'status',
                     ],
                     'safe',

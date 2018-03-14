@@ -8,135 +8,117 @@
 
 namespace flipbox\domains\services;
 
-use Craft;
 use craft\base\Element;
 use craft\base\ElementInterface;
-use flipbox\craft\sourceTarget\db\FieldAssociationQueryInterface;
-use flipbox\craft\sourceTarget\fields\FieldAssociationInterface;
-use flipbox\craft\sourceTarget\models\AssociationModelInterface;
-use flipbox\craft\sourceTarget\models\AssociationModelWithFieldInterface;
-use flipbox\craft\sourceTarget\services\FieldAssociations;
+use flipbox\craft\sourceTarget\db\AssociationQueryInterface;
+use flipbox\craft\sourceTarget\records\AssociationRecordInterface;
+use flipbox\craft\sourceTarget\services\SortableAssociations;
 use flipbox\domains\db\DomainsQuery;
-use flipbox\domains\models\Domain;
+use flipbox\domains\fields\Domains as DomainsField;
+use flipbox\domains\records\Domain;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since 1.0.0
  */
-class Associations extends FieldAssociations
+class Associations extends SortableAssociations
 {
     /**
      * @inheritdoc
-     * @return FieldAssociationQueryInterface|DomainsQuery
      */
-    public function getQuery(FieldAssociationInterface $field, $criteria = []): FieldAssociationQueryInterface
+    public function getQuery($config = []): AssociationQueryInterface
     {
-        return new DomainsQuery($field, $criteria);
+        return new DomainsQuery(Domain::class, $config);
     }
 
     /**
-     * @param FieldAssociationQueryInterface $query
+     * @inheritdoc
+     */
+    protected static function tableName(): string
+    {
+        return Domain::tableName();
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function source(): string
+    {
+        return Domain::SOURCE_ATTRIBUTE;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public static function target(): string
+    {
+        return Domain::TARGET_ATTRIBUTE;
+    }
+
+    /**
+     * @param AssociationRecordInterface|Domain $record
+     * @return AssociationQueryInterface|DomainsQuery
+     */
+    protected function associationQuery(
+        AssociationRecordInterface $record
+    ): AssociationQueryInterface {
+        return $this->newAssociationQuery(
+            $record->{static::source()},
+            $record->fieldId,
+            $record->siteId
+        );
+    }
+
+    /**
+     * @param $source
+     * @param int $fieldId
+     * @param int $siteId
+     * @return AssociationQueryInterface
+     */
+    private function newAssociationQuery(
+        $source,
+        int $fieldId,
+        int $siteId
+    ): AssociationQueryInterface {
+        return $this->getQuery()
+            ->where([
+                static::source() => $source,
+                'fieldId' => $fieldId,
+                'siteId' => $siteId
+            ])
+            ->orderBy(['sortOrder' => SORT_ASC]);
+    }
+
+    /**
+     * @param DomainsField $field
+     * @param DomainsQuery $query
      * @param ElementInterface|Element $source
      * @return bool
      * @throws \Exception
      */
     public function save(
-        FieldAssociationQueryInterface $query,
+        DomainsField $field,
+        DomainsQuery $query,
         ElementInterface $source
     ): bool {
-        if (null === ($targets = $this->getTargetsFromQuery($query))) {
+        if (null === ($targets = $query->getCachedResult())) {
             return true;
         }
-
-        $newOrder = [];
-        $currentTargets = $this->getQuery($query->getField())
-            ->siteId($source->siteId)
-            ->elementId($source->getId())
+        $currentTargets = $this->newAssociationQuery(
+            $source->getId() ?: false,
+            $field->id,
+            $source->siteId
+        )
             ->indexBy('domain')
             ->all();
 
         if (false === $this->saveInternal(
-                $targets,
-                $currentTargets,
-                $newOrder
-            )) {
+            $targets,
+            $currentTargets
+        )) {
             return false;
         }
 
-        $model = new Domain($query->getField(), [
-            'elementId' => $source->getId(),
-            'siteId' => $source->siteId
-        ]);
-
-        return $this->reOrderIfDifferent(
-            $model,
-            $newOrder
-        );
-    }
-
-    /**
-     * @param AssociationModelWithFieldInterface|Domain $model
-     * @return FieldAssociationQueryInterface
-     */
-    protected function associationQuery(
-        AssociationModelWithFieldInterface $model
-    ): FieldAssociationQueryInterface {
-        return $this->getQuery($model->getField())
-            ->where([
-                $model->getSourceName() => $model->getSourceValue(),
-                'siteId' => $model->getSiteId()
-            ])
-            ->orderBy(['sortOrder' => SORT_ASC]);
-    }
-
-
-    /**
-     * @param AssociationModelInterface|Domain $model
-     * @return bool
-     * @throws \yii\db\Exception
-     */
-    protected function insertInternal(AssociationModelInterface $model): bool
-    {
-        return (bool)Craft::$app->getDb()->createCommand()->insert(
-            $model->getTableName(),
-            [
-                'domain' => $model->getTargetValue(),
-                'elementId' => $model->getSourceValue(),
-                'status' => $model->status,
-                'sortOrder' => $model->getSortOrder(),
-                'siteId' => $model->getSiteId()
-            ]
-        )->execute();
-    }
-
-    /**
-     * @param AssociationModelInterface|Domain $model
-     * @return bool
-     * @throws \yii\db\Exception
-     */
-    protected function updateInternal(AssociationModelInterface $model): bool
-    {
-        return (bool)Craft::$app->getDb()->createCommand()->update(
-            $model->getTableName(),
-            [
-                'status' => $model->status
-            ],
-            [
-                'domain' => $model->getTargetValue(),
-                'elementId' => $model->getSourceValue(),
-                'siteId' => $model->getSiteId()
-            ]
-        )->execute();
-    }
-
-
-    /**
-     * @param AssociationModelInterface|Domain $old
-     * @param AssociationModelInterface|Domain $new
-     * @return bool
-     */
-    protected function hasChanged(AssociationModelInterface $old, AssociationModelInterface $new): bool
-    {
-        return $old->status != $new->status;
+        return true;
     }
 }

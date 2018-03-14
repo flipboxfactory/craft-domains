@@ -9,12 +9,10 @@
 namespace flipbox\domains\services;
 
 use flipbox\domains\db\DomainsQuery;
-use flipbox\domains\fields\Domains as DomainsField;
-use flipbox\ember\exceptions\NotFoundException;
-use flipbox\ember\helpers\RecordHelper;
-use flipbox\ember\services\traits\queries\BaseAccessor;
+use flipbox\domains\records\Domain;
+use flipbox\ember\services\traits\records\Accessor;
 use yii\base\Component;
-use yii\db\QueryInterface;
+use yii\db\ActiveQuery;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
@@ -22,187 +20,21 @@ use yii\db\QueryInterface;
  */
 class Domains extends Component
 {
-    use BaseAccessor;
+    use Accessor;
 
     /**
-     * @param DomainsField $field
      * @inheritdoc
      */
-    public function getQuery(DomainsField $field, $config = []): QueryInterface
+    public static function recordClass(): string
     {
-        return new DomainsQuery($field, $config);
-    }
-
-    /*******************************************
-     * FIND / GET
-     *******************************************/
-
-    /**
-     * @param DomainsField $field
-     * @return array[]
-     */
-    public function findAll(DomainsField $field)
-    {
-        return $this->findAllByCondition($field, []);
+        return Domain::class;
     }
 
     /**
-     * @param DomainsField $field
-     * @param $identifier
-     * @return mixed|null
+     * @inheritdoc
      */
-    public function find(DomainsField $field, $identifier)
+    public function getQuery($config = []): ActiveQuery
     {
-        return $this->findByCondition($field, $identifier);
-    }
-
-    /**
-     * @param DomainsField $field
-     * @param $identifier
-     * @return mixed
-     * @throws NotFoundException
-     */
-    public function get(DomainsField $field, $identifier)
-    {
-        if (null === ($object = $this->find($field, $identifier))) {
-            $this->notFoundException();
-        }
-
-        return $object;
-    }
-
-
-    /*******************************************
-     * ONE CONDITION
-     *******************************************/
-
-    /**
-     * @param DomainsField $field
-     * @param $condition
-     * @return mixed|null
-     */
-    public function findByCondition(DomainsField $field, $condition)
-    {
-        return $this->findByCriteria(
-            $field,
-            RecordHelper::conditionToCriteria($condition)
-        );
-    }
-
-    /**
-     * @param DomainsField $field
-     * @param $condition
-     * @return mixed
-     * @throws NotFoundException
-     */
-    public function getByCondition(DomainsField $field, $condition)
-    {
-        if (null === ($object = $this->findByCondition($field, $condition))) {
-            $this->notFoundException();
-        }
-
-        return $object;
-    }
-
-
-    /*******************************************
-     * ONE CRITERIA
-     *******************************************/
-
-    /**
-     * @param DomainsField $field
-     * @param $criteria
-     * @return mixed|null
-     */
-    public function findByCriteria(DomainsField $field, $criteria)
-    {
-        $object = $this->findByQuery(
-            $this->getQuery($field, $criteria)
-        );
-
-        return $object;
-    }
-
-    /**
-     * @param DomainsField $field
-     * @param $criteria
-     * @return mixed
-     * @throws NotFoundException
-     */
-    public function getByCriteria(DomainsField $field, $criteria)
-    {
-        if (null === ($record = $this->findByCriteria($field, $criteria))) {
-            $this->notFoundException();
-        }
-
-        return $record;
-    }
-
-
-    /*******************************************
-     * ALL CONDITION
-     *******************************************/
-
-    /**
-     * @param DomainsField $field
-     * @param array $condition
-     * @return array
-     */
-    public function findAllByCondition(DomainsField $field, $condition = []): array
-    {
-        return $this->findAllByCriteria(
-            $field,
-            RecordHelper::conditionToCriteria($condition)
-        );
-    }
-
-    /**
-     * @param DomainsField $field
-     * @param array $condition
-     * @return array
-     * @throws NotFoundException
-     */
-    public function getAllByCondition(DomainsField $field, $condition = []): array
-    {
-        $records = $this->findAllByCondition($field, $condition);
-        if (empty($records)) {
-            $this->notFoundException();
-        }
-
-        return $records;
-    }
-
-    /*******************************************
-     * ALL CRITERIA
-     *******************************************/
-
-    /**
-     * @param DomainsField $field
-     * @param array $criteria
-     * @return array
-     */
-    public function findAllByCriteria(DomainsField $field, $criteria = []): array
-    {
-        $records = $this->findAllByQuery(
-            $this->getQuery($field, $criteria)
-        );
-
-        return $records;
-    }
-
-    /**
-     * @param DomainsField $field
-     * @param array $criteria
-     * @return array
-     * @throws NotFoundException
-     */
-    public function getAllByCriteria(DomainsField $field, $criteria = []): array
-    {
-        $records = $this->findAllByCriteria($field, $criteria);
-        if (empty($records)) {
-            $this->notFoundException();
-        }
-
-        return $records;
+        return new DomainsQuery(static::recordClass(), $config);
     }
 }

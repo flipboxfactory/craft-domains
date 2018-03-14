@@ -13,7 +13,7 @@ use craft\base\Element;
 use craft\base\ElementInterface;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\fields\Domains;
-use flipbox\domains\models\Domain;
+use flipbox\domains\records\Domain;
 use yii\base\Exception;
 use yii\base\Model;
 use yii\validators\Validator;
@@ -24,7 +24,6 @@ use yii\validators\Validator;
  */
 class DomainsValidator extends Validator
 {
-
     /**
      * @var Domains
      */
@@ -130,7 +129,7 @@ class DomainsValidator extends Validator
     protected function validateUniqueDomain(array $domains, ElementInterface $element, string $attribute)
     {
         /** @var Element $element */
-        $domainQuery = (new DomainsQuery($this->field))
+        $domainQuery = Domain::find()
             ->select(['elementId', 'domain'])
             ->andWhere(['domain' => $domains]);
 

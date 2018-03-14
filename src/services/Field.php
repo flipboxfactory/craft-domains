@@ -9,34 +9,17 @@
 namespace flipbox\domains\services;
 
 use Craft;
-use craft\db\Migration;
-use flipbox\craft\sourceTarget\services\Field as BaseField;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\fields\Domains as DomainsField;
-use flipbox\domains\migrations\CreateDomainsTable;
+use yii\base\Component;
 use yii\base\Exception;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since  1.0.0
  */
-class Field extends BaseField
+class Field extends Component
 {
-    /**
-     *  The table prefix
-     */
-    const TABLE_PREFIX = 'domains_';
-
-    /**
-     * @inheritdoc
-     */
-    protected function createRelationsMigrationTable(string $tableName): Migration
-    {
-        return new CreateDomainsTable([
-            'tableName' => $tableName
-        ]);
-    }
-
     /**
      * @param DomainsField $field
      * @param DomainsQuery $query

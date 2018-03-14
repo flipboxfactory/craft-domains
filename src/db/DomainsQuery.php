@@ -9,14 +9,13 @@
 namespace flipbox\domains\db;
 
 use craft\db\QueryAbortedException;
-use flipbox\craft\sourceTarget\db\FieldAssociationsQuery;
-use flipbox\craft\sourceTarget\models\AssociationModelInterface;
-use flipbox\domains\models\Domain;
+use flipbox\craft\sourceTarget\db\AssociationQuery;
+use flipbox\domains\records\Domain;
 
 /**
  * @method Domain[] getCachedResult()
  */
-class DomainsQuery extends FieldAssociationsQuery
+class DomainsQuery extends AssociationQuery
 {
     use traits\Attributes;
 
@@ -36,7 +35,7 @@ class DomainsQuery extends FieldAssociationsQuery
     public function prepare($builder)
     {
         // Is the query already doomed?
-        if (($this->elementId !== null && empty($this->elementId)) ||
+        if (($this->fieldId !== null && empty($this->fieldId)) ||
             ($this->domain !== null && empty($this->domain))
         ) {
             throw new QueryAbortedException();
@@ -45,14 +44,5 @@ class DomainsQuery extends FieldAssociationsQuery
         $this->applyConditions();
 
         return parent::prepare($builder);
-    }
-
-    /**
-     * @inheritdoc
-     * @return Domain
-     */
-    protected function createObject($row): AssociationModelInterface
-    {
-        return new Domain($this->field, $row);
     }
 }

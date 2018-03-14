@@ -12,25 +12,24 @@ use Craft;
 use craft\base\Element;
 use craft\base\ElementInterface;
 use craft\base\Field;
-use craft\elements\db\ElementQuery;
-use craft\elements\db\ElementQueryInterface;
+use craft\base\FieldInterface;
 use craft\helpers\ArrayHelper;
-use flipbox\craft\sourceTarget\db\AssociationQueryInterface;
-use flipbox\craft\sourceTarget\fields\FieldAssociationInterface;
+use flipbox\craft\sourceTarget\db\AssociationQuery;
+use flipbox\craft\sourceTarget\fields\traits\ModifyElementsQueryTrait;
 use flipbox\craft\sourceTarget\fields\traits\NormalizeTrait;
-use flipbox\craft\sourceTarget\models\AssociationModelInterface;
+use flipbox\craft\sourceTarget\records\AssociationRecordInterface;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
-use flipbox\domains\models\Domain;
+use flipbox\domains\records\Domain;
 use flipbox\domains\validators\DomainsValidator;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since 1.0.0
  */
-class Domains extends Field implements FieldAssociationInterface
+class Domains extends Field implements FieldInterface
 {
-    use NormalizeTrait;
+    use NormalizeTrait, ModifyElementsQueryTrait;
 
     /**
      * @var bool
@@ -63,7 +62,7 @@ class Domains extends Field implements FieldAssociationInterface
     /**
      * @return array
      */
-    public function getStatuses(): array
+    public static function getStatuses(): array
     {
         return [
             'enabled' => Craft::t('domains', 'Enabled'),
@@ -81,78 +80,63 @@ class Domains extends Field implements FieldAssociationInterface
     }
 
     /*******************************************
-     * TABLE
+     * QUERY
      *******************************************/
 
     /**
      * @inheritdoc
+     * @return DomainsQuery
      */
-    public function getTableName(): string
+    protected function newQuery(): AssociationQuery
     {
-        return DomainsPlugin::getInstance()->getField()->getTableName($this);
+        $query = Domain::find()
+            ->fieldId($this->id);
+
+        if ($this->allowLimit === true && $this->limit !== null) {
+            $query->limit = $this->limit;
+        }
+
+        return $query;
     }
 
     /**
-     * @inheritdoc
-     */
-    public function getTableAlias(): string
-    {
-        return DomainsPlugin::getInstance()->getField()->getTableAlias($this);
-    }
-
-
-    /*******************************************
-     * SOURCE / TARGET ATTRIBUTES
-     *******************************************/
-
-    /**
-     * @inheritdoc
+     * The relations table name
+     *
+     * @return string
      */
     protected function sourceAttribute(): string
     {
-        return 'elementId';
+        return Domain::SOURCE_ATTRIBUTE;
     }
 
     /**
-     * @inheritdoc
+     * The relations table alias
+     *
+     * @return string
      */
     protected function targetAttribute(): string
     {
-        return 'domain';
+        return Domain::TARGET_ATTRIBUTE;
     }
 
-    /*******************************************
-     * ELEMENT
-     *******************************************/
+    /**
+     * The relations table name
+     *
+     * @return string
+     */
+    public function getTableName(): string
+    {
+        return Domain::tableName();
+    }
 
     /**
-     * @inheritdoc
+     * The relations table alias
+     *
+     * @return string
      */
-    public function modifyElementsQuery(ElementQueryInterface $query, $value)
+    public function getTableAlias(): string
     {
-        /** @var ElementQuery $query */
-        if ($value === 'not :empty:') {
-            $value = ':notempty:';
-        }
-
-        if ($value === ':notempty:' || $value === ':empty:') {
-            $fieldService = DomainsPlugin::getInstance()->getField();
-            $alias = $fieldService->getTableAlias($this);
-            $name = $fieldService->getTableName($this);
-            $operator = ($value === ':notempty:' ? '!=' : '=');
-
-            $query->subQuery->andWhere([
-                "(select count([[{$alias}.id]]) from " .
-                $name .
-                " {{{$alias}}} where [[{$alias}.elementId]] = [[elements.id]]) {$operator} 0"
-            ]);
-        } else {
-            if ($value !== null) {
-                return false;
-            }
-        }
-
-        return null;
+        return Domain::tableAlias();
     }
 
     /**
@@ -170,14 +154,6 @@ class Domains extends Field implements FieldAssociationInterface
         return $rules;
     }
 
-    /**
-     * @inheritdoc
-     * @return DomainsQuery
-     */
-    protected function newQuery(): AssociationQueryInterface
-    {
-        return new DomainsQuery($this);
-    }
 
     /*******************************************
      * NORMALIZE VALUE
@@ -186,31 +162,11 @@ class Domains extends Field implements FieldAssociationInterface
     /**
      * @inheritdoc
      */
-    public function normalizeValue($value, ElementInterface $element = null)
-    {
-        if ($value instanceof DomainsQuery) {
-            return $value;
-        }
-
-        $query = $this->newQuery();
-        $query->siteId = $this->targetSiteId($element);
-
-        if ($this->allowLimit === true && $this->limit !== null) {
-            $query->limit = $this->limit;
-        }
-
-        $this->normalizeQueryValue($query, $value, $element);
-        return $query;
-    }
-
-    /**
-     * @inheritdoc
-     */
     protected function normalizeQueryInputValue(
         $value,
         int &$sortOrder,
         ElementInterface $element = null
-    ): AssociationModelInterface {
+    ): AssociationRecordInterface {
         if (!is_array($value)) {
             $value = [
                 'domain' => $value,
@@ -219,32 +175,16 @@ class Domains extends Field implements FieldAssociationInterface
         }
 
         return new Domain(
-            $this,
             [
-                Domain::TARGET_ATTRIBUTE => ArrayHelper::getValue($value, 'domain'),
-                Domain::SOURCE_ATTRIBUTE => $element ? $element->getId() : false,
+                'fieldId' => $this->id,
+                'domain' => ArrayHelper::getValue($value, 'domain'),
+                'elementId' => $element ? $element->getId() : false,
                 'status' => ArrayHelper::getValue($value, 'status'),
                 'siteId' => $this->targetSiteId($element),
                 'sortOrder' => $sortOrder++
             ]
         );
     }
-
-    /**
-     * @param DomainsQuery $query
-     * @param string $value
-     * @param ElementInterface|null $element
-     */
-    protected function normalizeQuery(DomainsQuery $query, string $value = null, ElementInterface $element = null)
-    {
-        if ($value !== '' && $element !== null && $element->getId() !== null) {
-            $query->elementId($element->getId());
-        } else {
-            $query->elementId(false);
-            $query->domain(false);
-        }
-    }
-
 
     /**
      * @param DomainsQuery $value
@@ -254,8 +194,8 @@ class Domains extends Field implements FieldAssociationInterface
     {
         $domains = [];
 
-        foreach ($value->all() as $domain) {
-            array_push($domains, $domain->domain);
+        foreach ($value->all() as $association) {
+            array_push($domains, $association->domain);
         }
 
         return parent::getSearchKeywords($domains, $element);
@@ -280,23 +220,23 @@ class Domains extends Field implements FieldAssociationInterface
      * EVENTS
      *******************************************/
 
-    /**
-     * @inheritdoc
-     */
-    public function afterSave(bool $isNew)
-    {
-        DomainsPlugin::getInstance()->getField()->save($this);
-        parent::afterSave($isNew);
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function afterDelete()
-    {
-        DomainsPlugin::getInstance()->getField()->delete($this);
-        parent::afterDelete();
-    }
+//    /**
+//     * @inheritdoc
+//     */
+//    public function afterSave(bool $isNew)
+//    {
+//        DomainsPlugin::getInstance()->getField()->save($this);
+//        parent::afterSave($isNew);
+//    }
+//
+//    /**
+//     * @inheritdoc
+//     */
+//    public function afterDelete()
+//    {
+//        DomainsPlugin::getInstance()->getField()->delete($this);
+//        parent::afterDelete();
+//    }
 
     /**
      * @inheritdoc
@@ -304,6 +244,7 @@ class Domains extends Field implements FieldAssociationInterface
     public function afterElementSave(ElementInterface $element, bool $isNew)
     {
         DomainsPlugin::getInstance()->getAssociations()->save(
+            $this,
             $element->getFieldValue($this->handle),
             $element
         );
