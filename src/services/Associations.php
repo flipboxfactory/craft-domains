@@ -8,14 +8,12 @@
 
 namespace flipbox\domains\services;
 
-use craft\base\Element;
-use craft\base\ElementInterface;
 use flipbox\craft\sourceTarget\db\SortableAssociationQueryInterface;
 use flipbox\craft\sourceTarget\records\SortableAssociationInterface;
 use flipbox\craft\sourceTarget\services\SortableAssociations;
 use flipbox\domains\db\DomainsQuery;
-use flipbox\domains\fields\Domains as DomainsField;
 use flipbox\domains\records\Domain;
+use yii\db\ActiveQuery;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
@@ -23,6 +21,21 @@ use flipbox\domains\records\Domain;
  */
 class Associations extends SortableAssociations
 {
+    /**
+     * @inheritdoc
+     */
+    const TABLE_ALIAS = Domain::TABLE_ALIAS;
+
+    /**
+     * @inheritdoc
+     */
+    const SOURCE_ATTRIBUTE = Domain::SOURCE_ATTRIBUTE;
+
+    /**
+     * @inheritdoc
+     */
+    const TARGET_ATTRIBUTE = Domain::TARGET_ATTRIBUTE;
+
     /**
      * @inheritdoc
      * @return DomainsQuery
@@ -33,57 +46,51 @@ class Associations extends SortableAssociations
     }
 
     /**
-     * @inheritdoc
-     */
-    protected static function tableName(): string
-    {
-        return Domain::tableName();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function source(): string
-    {
-        return Domain::SOURCE_ATTRIBUTE;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function target(): string
-    {
-        return Domain::TARGET_ATTRIBUTE;
-    }
-
-    /**
      * @param SortableAssociationInterface|Domain $record
      * @return SortableAssociationQueryInterface|DomainsQuery
      */
     protected function associationQuery(
         SortableAssociationInterface $record
     ): SortableAssociationQueryInterface {
-        return $this->newAssociationQuery(
-            $record->{static::source()},
+        return $this->query(
+            $record->{static::SOURCE_ATTRIBUTE},
             $record->fieldId,
             $record->siteId
         );
     }
 
     /**
+     * @param SortableAssociationQueryInterface|DomainsQuery $query
+     * @return array
+     */
+    protected function existingAssociations(
+        SortableAssociationQueryInterface $query
+    ): array {
+        $source = $this->resolveStringAttribute($query, static::SOURCE_ATTRIBUTE);
+        $field = $this->resolveStringAttribute($query, 'fieldId');
+        $site = $this->resolveStringAttribute($query, 'siteId');
+
+        if ($source === null || $field === null || $site === null) {
+            return [];
+        }
+
+        return $this->associations($source, $field, $site);
+    }
+
+    /**
      * @param $source
      * @param int $fieldId
      * @param int $siteId
-     * @return SortableAssociationQueryInterface
+     * @return SortableAssociationQueryInterface|ActiveQuery
      */
-    private function newAssociationQuery(
+    private function query(
         $source,
         int $fieldId,
         int $siteId
     ): SortableAssociationQueryInterface {
         return $this->getQuery()
             ->where([
-                static::source() => $source,
+                static::SOURCE_ATTRIBUTE => $source,
                 'fieldId' => $fieldId,
                 'siteId' => $siteId
             ])
@@ -91,35 +98,18 @@ class Associations extends SortableAssociations
     }
 
     /**
-     * @param DomainsField $field
-     * @param DomainsQuery $query
-     * @param ElementInterface|Element $source
-     * @return bool
-     * @throws \Exception
+     * @param $source
+     * @param int $fieldId
+     * @param int $siteId
+     * @return array
      */
-    public function save(
-        DomainsField $field,
-        DomainsQuery $query,
-        ElementInterface $source
-    ): bool {
-        if (null === ($targets = $query->getCachedResult())) {
-            return true;
-        }
-        $currentTargets = $this->newAssociationQuery(
-            $source->getId() ?: false,
-            $field->id,
-            $source->siteId
-        )
-            ->indexBy('domain')
+    private function associations(
+        $source,
+        int $fieldId,
+        int $siteId
+    ): array {
+        return $this->query($source, $fieldId, $siteId)
+            ->indexBy(static::TARGET_ATTRIBUTE)
             ->all();
-
-        if (false === $this->saveInternal(
-            $targets,
-            $currentTargets
-        )) {
-            return false;
-        }
-
-        return true;
     }
 }

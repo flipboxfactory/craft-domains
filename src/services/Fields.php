@@ -74,6 +74,7 @@ class Fields extends SortableFields
 
         return $query;
     }
+
     /*******************************************
      * NORMALIZE VALUE
      *******************************************/
