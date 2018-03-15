@@ -9,8 +9,8 @@
 namespace flipbox\domains\db;
 
 use craft\db\QueryAbortedException;
-use flipbox\craft\sourceTarget\db\SortableAssociationQuery;
-use flipbox\craft\sourceTarget\db\traits\SiteAttribute;
+use flipbox\craft\sortable\associations\db\SortableAssociationQuery;
+use flipbox\craft\sortable\associations\db\traits\SiteAttribute;
 use flipbox\domains\records\Domain;
 
 /**

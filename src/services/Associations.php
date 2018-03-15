@@ -8,9 +8,9 @@
 
 namespace flipbox\domains\services;
 
-use flipbox\craft\sourceTarget\db\SortableAssociationQueryInterface;
-use flipbox\craft\sourceTarget\records\SortableAssociationInterface;
-use flipbox\craft\sourceTarget\services\SortableAssociations;
+use flipbox\craft\sortable\associations\db\SortableAssociationQueryInterface;
+use flipbox\craft\sortable\associations\records\SortableAssociationInterface;
+use flipbox\craft\sortable\associations\services\SortableAssociations;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\records\Domain;
 use yii\db\ActiveQuery;

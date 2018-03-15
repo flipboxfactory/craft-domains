@@ -8,27 +8,23 @@
 
 namespace flipbox\domains\actions;
 
-use flipbox\domains\Domains as DomainsPlugin;
-use flipbox\domains\models\Domain;
-use flipbox\ember\actions\model\traits\Delete;
+use flipbox\craft\sortable\associations\records\SortableAssociationInterface;
+use flipbox\domains\Domains;
+use yii\base\Model;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since  1.0.0
  */
-abstract class Dissociate extends Action
+class Dissociate extends Action
 {
-    use Delete, traits\Lookup;
-
     /**
-     * @param Domain $model
+     * @param Model|SortableAssociationInterface $model
      * @return bool
      * @throws \Exception
      */
-    protected function performAction(Domain $model): bool
+    protected function performAction(Model $model): bool
     {
-        return DomainsPlugin::getInstance()->getAssociations()->dissociate(
-            $model
-        );
+        return Domains::getInstance()->getAssociations()->dissociate($model);
     }
 }

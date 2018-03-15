@@ -12,9 +12,9 @@ use Craft;
 use craft\base\ElementInterface;
 use craft\base\FieldInterface;
 use craft\helpers\ArrayHelper;
-use flipbox\craft\sourceTarget\db\SortableAssociationQueryInterface;
-use flipbox\craft\sourceTarget\records\SortableAssociationInterface;
-use flipbox\craft\sourceTarget\services\SortableFields;
+use flipbox\craft\sortable\associations\db\SortableAssociationQueryInterface;
+use flipbox\craft\sortable\associations\records\SortableAssociationInterface;
+use flipbox\craft\sortable\associations\services\SortableFields;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\fields\Domains as DomainsField;
@@ -51,8 +51,8 @@ class Fields extends SortableFields
         if (!$field instanceof DomainsField) {
             throw new Exception(sprintf(
                 "The field must be an instance of '%s', '%s' given.",
-                (string) DomainsField::class,
-                (string) get_class($field)
+                (string)DomainsField::class,
+                (string)get_class($field)
             ));
         }
     }

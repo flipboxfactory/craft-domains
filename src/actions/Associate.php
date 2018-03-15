@@ -8,54 +8,23 @@
 
 namespace flipbox\domains\actions;
 
-use flipbox\domains\Domains as DomainsPlugin;
-use flipbox\domains\models\Domain;
+use flipbox\craft\sortable\associations\records\SortableAssociationInterface;
+use flipbox\domains\Domains;
+use yii\base\Model;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
  * @since  1.0.0
  */
-abstract class Associate extends Action
+class Associate extends Action
 {
-    use traits\Save;
-
     /**
-     * @param int $elementId
-     * @param string $domain
-     *
-     * @return Domain
+     * @param Model|SortableAssociationInterface $model
+     * @return bool
+     * @throws \Exception
      */
-    public function run(int $elementId, string $domain)
+    protected function performAction(Model $model): bool
     {
-        return $this->runInternal(
-            $this->resolve($elementId, $domain)
-        );
-    }
-
-    /**
-     * @param int $elementId
-     * @param string $domain
-     *
-     * @return Domain
-     */
-    protected function resolve(int $elementId, string $domain)
-    {
-        if (!$model = DomainsPlugin::getInstance()->getDomains()->find(
-            $this->getField(),
-            [
-                'domain' => $domain,
-                'elementId' => $elementId
-            ]
-        )) {
-            $model = new Domain(
-                $this->getField(),
-                [
-                    'elementId' => $elementId,
-                    'domain' => $domain
-                ]
-            );
-        }
-
-        return $model;
+        return Domains::getInstance()->getAssociations()->associate($model);
     }
 }

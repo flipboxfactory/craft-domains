@@ -8,8 +8,7 @@
 
 namespace flipbox\domains\records;
 
-use Craft;
-use flipbox\craft\sourceTarget\records\SortableAssociation;
+use flipbox\craft\sortable\associations\records\SortableAssociation;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\fields\Domains;
