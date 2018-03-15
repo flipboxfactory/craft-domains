@@ -9,18 +9,12 @@
 namespace flipbox\domains\fields;
 
 use Craft;
-use craft\base\Element;
 use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\base\FieldInterface;
-use craft\helpers\ArrayHelper;
-use flipbox\craft\sourceTarget\db\AssociationQuery;
-use flipbox\craft\sourceTarget\fields\traits\ModifyElementsQueryTrait;
-use flipbox\craft\sourceTarget\fields\traits\NormalizeTrait;
-use flipbox\craft\sourceTarget\records\AssociationRecordInterface;
+use craft\elements\db\ElementQueryInterface;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
-use flipbox\domains\records\Domain;
 use flipbox\domains\validators\DomainsValidator;
 
 /**
@@ -29,8 +23,6 @@ use flipbox\domains\validators\DomainsValidator;
  */
 class Domains extends Field implements FieldInterface
 {
-    use NormalizeTrait, ModifyElementsQueryTrait;
-
     /**
      * @var bool
      */
@@ -79,66 +71,6 @@ class Domains extends Field implements FieldInterface
         return false;
     }
 
-    /*******************************************
-     * QUERY
-     *******************************************/
-
-    /**
-     * @inheritdoc
-     * @return DomainsQuery
-     */
-    protected function newQuery(): AssociationQuery
-    {
-        $query = Domain::find()
-            ->fieldId($this->id);
-
-        if ($this->allowLimit === true && $this->limit !== null) {
-            $query->limit = $this->limit;
-        }
-
-        return $query;
-    }
-
-    /**
-     * The relations table name
-     *
-     * @return string
-     */
-    protected function sourceAttribute(): string
-    {
-        return Domain::SOURCE_ATTRIBUTE;
-    }
-
-    /**
-     * The relations table alias
-     *
-     * @return string
-     */
-    protected function targetAttribute(): string
-    {
-        return Domain::TARGET_ATTRIBUTE;
-    }
-
-    /**
-     * The relations table name
-     *
-     * @return string
-     */
-    public function getTableName(): string
-    {
-        return Domain::tableName();
-    }
-
-    /**
-     * The relations table alias
-     *
-     * @return string
-     */
-    public function getTableAlias(): string
-    {
-        return Domain::tableAlias();
-    }
-
     /**
      * @inheritdoc
      */
@@ -154,37 +86,23 @@ class Domains extends Field implements FieldInterface
         return $rules;
     }
 
-
-    /*******************************************
-     * NORMALIZE VALUE
-     *******************************************/
-
     /**
      * @inheritdoc
      */
-    protected function normalizeQueryInputValue(
-        $value,
-        int &$sortOrder,
-        ElementInterface $element = null
-    ): AssociationRecordInterface {
-        if (!is_array($value)) {
-            $value = [
-                'domain' => $value,
-                'status' => $this->defaultStatus
-            ];
-        }
-
-        return new Domain(
-            [
-                'fieldId' => $this->id,
-                'domain' => ArrayHelper::getValue($value, 'domain'),
-                'elementId' => $element ? $element->getId() : false,
-                'status' => ArrayHelper::getValue($value, 'status'),
-                'siteId' => $this->targetSiteId($element),
-                'sortOrder' => $sortOrder++
-            ]
-        );
+    public function modifyElementsQuery(ElementQueryInterface $query, $value)
+    {
+        return DomainsPlugin::getInstance()->getFields()->modifyElementsQuery($this, $query, $value);
     }
+
+    /**
+     * @inheritdoc
+     * @return DomainsQuery
+     */
+    public function normalizeValue($value, ElementInterface $element = null)
+    {
+        return DomainsPlugin::getInstance()->getFields()->normalizeValue($this, $value, $element);
+    }
+
 
     /**
      * @param DomainsQuery $value
@@ -212,31 +130,13 @@ class Domains extends Field implements FieldInterface
      */
     public function getInputHtml($value, ElementInterface $element = null): string
     {
-        return DomainsPlugin::getInstance()->getField()->getTableHtml($this, $value, false);
+        return DomainsPlugin::getInstance()->getFields()->getTableHtml($this, $value, false);
     }
 
 
     /*******************************************
      * EVENTS
      *******************************************/
-
-//    /**
-//     * @inheritdoc
-//     */
-//    public function afterSave(bool $isNew)
-//    {
-//        DomainsPlugin::getInstance()->getField()->save($this);
-//        parent::afterSave($isNew);
-//    }
-//
-//    /**
-//     * @inheritdoc
-//     */
-//    public function afterDelete()
-//    {
-//        DomainsPlugin::getInstance()->getField()->delete($this);
-//        parent::afterDelete();
-//    }
 
     /**
      * @inheritdoc
@@ -250,27 +150,5 @@ class Domains extends Field implements FieldInterface
         );
 
         parent::afterElementSave($element, $isNew);
-    }
-
-
-    /*******************************************
-     * UTILITIES
-     *******************************************/
-
-    /**
-     * Returns the site ID that target elements should have.
-     *
-     * @param ElementInterface|Element|null $element
-     *
-     * @return int
-     */
-    protected function targetSiteId(ElementInterface $element = null): int
-    {
-        /** @var Element $element */
-        if (Craft::$app->getIsMultiSite() === true && $element !== null) {
-            return $element->siteId;
-        }
-
-        return Craft::$app->getSites()->currentSite->id;
     }
 }

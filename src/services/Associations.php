@@ -10,8 +10,8 @@ namespace flipbox\domains\services;
 
 use craft\base\Element;
 use craft\base\ElementInterface;
-use flipbox\craft\sourceTarget\db\AssociationQueryInterface;
-use flipbox\craft\sourceTarget\records\AssociationRecordInterface;
+use flipbox\craft\sourceTarget\db\SortableAssociationQueryInterface;
+use flipbox\craft\sourceTarget\records\SortableAssociationInterface;
 use flipbox\craft\sourceTarget\services\SortableAssociations;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\fields\Domains as DomainsField;
@@ -25,8 +25,9 @@ class Associations extends SortableAssociations
 {
     /**
      * @inheritdoc
+     * @return DomainsQuery
      */
-    public function getQuery($config = []): AssociationQueryInterface
+    public function getQuery($config = []): SortableAssociationQueryInterface
     {
         return new DomainsQuery(Domain::class, $config);
     }
@@ -56,12 +57,12 @@ class Associations extends SortableAssociations
     }
 
     /**
-     * @param AssociationRecordInterface|Domain $record
-     * @return AssociationQueryInterface|DomainsQuery
+     * @param SortableAssociationInterface|Domain $record
+     * @return SortableAssociationQueryInterface|DomainsQuery
      */
     protected function associationQuery(
-        AssociationRecordInterface $record
-    ): AssociationQueryInterface {
+        SortableAssociationInterface $record
+    ): SortableAssociationQueryInterface {
         return $this->newAssociationQuery(
             $record->{static::source()},
             $record->fieldId,
@@ -73,13 +74,13 @@ class Associations extends SortableAssociations
      * @param $source
      * @param int $fieldId
      * @param int $siteId
-     * @return AssociationQueryInterface
+     * @return SortableAssociationQueryInterface
      */
     private function newAssociationQuery(
         $source,
         int $fieldId,
         int $siteId
-    ): AssociationQueryInterface {
+    ): SortableAssociationQueryInterface {
         return $this->getQuery()
             ->where([
                 static::source() => $source,

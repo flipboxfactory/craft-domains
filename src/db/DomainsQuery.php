@@ -9,15 +9,17 @@
 namespace flipbox\domains\db;
 
 use craft\db\QueryAbortedException;
-use flipbox\craft\sourceTarget\db\AssociationQuery;
+use flipbox\craft\sourceTarget\db\SortableAssociationQuery;
+use flipbox\craft\sourceTarget\db\traits\SiteAttribute;
 use flipbox\domains\records\Domain;
 
 /**
  * @method Domain[] getCachedResult()
  */
-class DomainsQuery extends AssociationQuery
+class DomainsQuery extends SortableAssociationQuery
 {
-    use traits\Attributes;
+    use traits\Attributes,
+        SiteAttribute;
 
     /**
      * @inheritdoc
@@ -41,6 +43,7 @@ class DomainsQuery extends AssociationQuery
             throw new QueryAbortedException();
         }
 
+        $this->applySiteConditions();
         $this->applyConditions();
 
         return parent::prepare($builder);

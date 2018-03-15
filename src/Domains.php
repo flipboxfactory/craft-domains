@@ -41,11 +41,11 @@ class Domains extends BasePlugin
     }
 
     /**
-     * @return services\Field
+     * @return services\Fields
      */
-    public function getField()
+    public function getFields()
     {
-        return $this->get('field');
+        return $this->get('fields');
     }
 
     /**

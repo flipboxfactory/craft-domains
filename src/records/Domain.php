@@ -9,12 +9,13 @@
 namespace flipbox\domains\records;
 
 use Craft;
-use flipbox\craft\sourceTarget\records\AssociationsRecord;
+use flipbox\craft\sourceTarget\records\SortableAssociation;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\fields\Domains;
 use flipbox\domains\validators\DomainValidator;
 use flipbox\ember\helpers\ModelHelper;
+use flipbox\ember\traits\SiteRules;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
@@ -24,8 +25,10 @@ use flipbox\ember\helpers\ModelHelper;
  * @property string $domain
  * @property int $elementId
  */
-class Domain extends AssociationsRecord
+class Domain extends SortableAssociation
 {
+    use SiteRules;
+
     /**
      * @inheritdoc
      */
@@ -47,10 +50,7 @@ class Domain extends AssociationsRecord
      */
     public static function find()
     {
-        return Craft::createObject(
-            DomainsQuery::class,
-            [get_called_class()]
-        );
+        return DomainsPlugin::getInstance()->getAssociations()->getQuery();
     }
 
     /**
@@ -82,6 +82,7 @@ class Domain extends AssociationsRecord
     {
         return array_merge(
             parent::rules(),
+            $this->siteRules(),
             [
                 [
                     [
@@ -116,30 +117,6 @@ class Domain extends AssociationsRecord
                         ModelHelper::SCENARIO_DEFAULT
                     ]
                 ]
-            ]
-        );
-    }
-
-    /**
-     * @return array
-     */
-    public function attributes()
-    {
-        return array_merge(
-            parent::attributes()
-        );
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function attributeLabels()
-    {
-        return array_merge(
-            parent::attributeLabels(),
-            [
-                'domain' => Craft::t('domains', 'Domain'),
-                'status' => Craft::t('domains', 'Status')
             ]
         );
     }
