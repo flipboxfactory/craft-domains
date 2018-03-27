@@ -9,6 +9,7 @@
 namespace flipbox\domains\records;
 
 use flipbox\craft\sortable\associations\records\SortableAssociation;
+use flipbox\craft\sortable\associations\services\SortableAssociations;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\fields\Domains;
@@ -44,34 +45,20 @@ class Domain extends SortableAssociation
     const SOURCE_ATTRIBUTE = 'elementId';
 
     /**
+     * @inheritdoc
+     */
+    protected function associationService(): SortableAssociations
+    {
+        return DomainsPlugin::getInstance()->getAssociations();
+    }
+
+    /**
      * {@inheritdoc}
      * @return DomainsQuery
      */
     public static function find()
     {
         return DomainsPlugin::getInstance()->getAssociations()->getQuery();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function associate(bool $autoReorder = true): bool
-    {
-        return DomainsPlugin::getInstance()->getAssociations()->associate(
-            $this,
-            $autoReorder
-        );
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function dissociate(bool $autoReorder = true): bool
-    {
-        return DomainsPlugin::getInstance()->getAssociations()->dissociate(
-            $this,
-            $autoReorder
-        );
     }
 
     /**
