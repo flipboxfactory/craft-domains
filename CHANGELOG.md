@@ -1,14 +1,18 @@
 Changelog
 =========
-## [1.0.0-rc.1] - 2018-03-01
+## Unreleased
+### Changed
+- Dependencies now rely on `Sortable Associations` package.
+- Lots of classes
+
+## 1.0.0-rc.1 - 2018-03-01
 ### Changed
 - More refactoring and optimizations
 
-## [1.0.0-rc] - 2018-02-28
+## 1.0.0-rc - 2018-02-28
 ### Changed
 - Refactored various classes.  No migrations needed, but external references be advised as
 no deprecations were issued.
 
-## [1.0.0-beta] - 2017-11-06
-
+## 1.0.0-beta - 2017-11-06
 Initial release.
