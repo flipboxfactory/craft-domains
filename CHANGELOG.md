@@ -1,9 +1,10 @@
 Changelog
 =========
-## Unreleased
+## 1.0.0-rc.2 - 2018-03-27
 ### Changed
 - Dependencies now rely on `Sortable Associations` package.
 - Lots of classes
+- Table structure (no migration, please uninstall/reinstall)
 
 ## 1.0.0-rc.1 - 2018-03-01
 ### Changed
