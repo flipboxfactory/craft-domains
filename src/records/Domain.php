@@ -98,27 +98,6 @@ class Domain extends SortableAssociation
                 ],
                 [
                     [
-                        'fieldId'
-                    ],
-                    LimitValidator::class,
-                    'query' => function (Domain $model) {
-                        return $model::find()
-                            ->field($model->fieldId)
-                            ->element($model->elementId)
-                            ->site($model->siteId)
-                            ->andWhere([
-                                '!=',
-                                static::TARGET_ATTRIBUTE,
-                                $model->{static::TARGET_ATTRIBUTE}
-                            ]);
-                    },
-                    'limit' => function (Domain $model) {
-                        return $this->getFieldLimit($model->fieldId);
-                    },
-                    'message' => "Limit exceeded."
-                ],
-                [
-                    [
                         'fieldId',
                         'status',
                     ],
@@ -129,33 +108,5 @@ class Domain extends SortableAssociation
                 ]
             ]
         );
-    }
-
-    /**
-     * @param int $fieldId
-     * @return Domains
-     */
-    protected function resolveField(int $fieldId): Domains
-    {
-        $field = Craft::$app->getFields()->getFieldById($fieldId);
-
-        if ($field === null || !$field instanceof Domains) {
-            throw new InvalidArgumentException(sprintf(
-                "Field must be an instance of '%s', '%s' given.",
-                Domains::class,
-                $field ? get_class($field) : 'FIELD NOT FOUND'
-            ));
-        }
-
-        return $field;
-    }
-
-    /**
-     * @param int $fieldId
-     * @return int
-     */
-    protected function getFieldLimit(int $fieldId): int
-    {
-        return (int) $this->resolveField($fieldId)->limit;
     }
 }

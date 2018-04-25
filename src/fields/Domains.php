@@ -9,13 +9,16 @@
 namespace flipbox\domains\fields;
 
 use Craft;
+use craft\base\Element;
 use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\base\FieldInterface;
 use craft\elements\db\ElementQueryInterface;
+use craft\validators\ArrayValidator;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\validators\DomainsValidator;
+use flipbox\domains\validators\MinMaxValidator;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
@@ -29,14 +32,14 @@ class Domains extends Field implements FieldInterface
     public $unique = true;
 
     /**
-     * @var int|null The maximum number of relations this field can have (used if [[allowLimit]] is set to true)
+     * @var int|null
      */
-    public $limit;
+    public $min;
 
     /**
-     * @var bool Whether to allow the Limit setting
+     * @var int|null
      */
-    public $allowLimit = true;
+    public $max;
 
     /**
      * @var string
@@ -76,15 +79,22 @@ class Domains extends Field implements FieldInterface
      */
     public function getElementValidationRules(): array
     {
-        $rules = parent::getElementValidationRules();
-
-        $rules[] = [
-            DomainsValidator::class,
-            'field' => $this
+        return [
+            [
+                DomainsValidator::class,
+                'field' => $this
+            ],
+            [
+                MinMaxValidator::class,
+                'min' => $this->min,
+                'max' => $this->max,
+                'tooFew' => Craft::t('domains', '{attribute} should contain at least {min, number} {min, plural, one{domain} other{domains}}.'),
+                'tooMany' => Craft::t('domains', '{attribute} should contain at most {max, number} {max, plural, one{domain} other{domains}}.'),
+                'skipOnEmpty' => false
+            ]
         ];
-
-        return $rules;
     }
+
 
     /**
      * @inheritdoc
@@ -125,6 +135,14 @@ class Domains extends Field implements FieldInterface
      *******************************************/
 
     /**
+     * @inheritdoc
+     */
+    public function getSettingsHtml()
+    {
+        return DomainsPlugin::getInstance()->getFields()->getSettingsHtml($this);
+    }
+
+    /**
      * @param DomainsQuery $value
      * @inheritdoc
      */
@@ -144,7 +162,7 @@ class Domains extends Field implements FieldInterface
     public function afterElementSave(ElementInterface $element, bool $isNew)
     {
         DomainsPlugin::getInstance()->getAssociations()->save(
-            $element->getFieldValue($this->handle)
+            $element->{$this->handle}
         );
 
         parent::afterElementSave($element, $isNew);

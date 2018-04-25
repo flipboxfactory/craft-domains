@@ -1,0 +1,25 @@
+{% import "_includes/forms" as forms %}
+
+{% block minField %}
+    {{ forms.textField({
+        label: "Min {type}"|t('domains', { type: field.displayName() }),
+        instructions: "The minimum the number of {type}."|t('domains', { type: field.displayName() }),
+        id: 'min',
+        name: 'min',
+        value: field.min,
+        size: 2,
+        errors: field.getErrors('min')
+    }) }}
+{% endblock %}
+
+{% block maxField %}
+    {{ forms.textField({
+        label: "Max {type}"|t('domains', { type: field.displayName() }),
+        instructions: "The maximum number of {type}."|t('app', { type: field.displayName() }),
+        id: 'max',
+        name: 'max',
+        value: field.max,
+        size: 2,
+        errors: field.getErrors('max')
+    }) }}
+{% endblock %}

@@ -115,6 +115,24 @@ class Fields extends SortableFields
 
     /**
      * @param DomainsField $field
+     * @return null|string
+     * @throws Exception
+     * @throws \Twig_Error_Loader
+     */
+    public function getSettingsHtml(
+        DomainsField $field
+    ) {
+        return Craft::$app->getView()->renderTemplate(
+            'domains/_components/fieldtypes/Domains/settings',
+            [
+                'field' => $field
+            ]
+        );
+    }
+
+
+    /**
+     * @param DomainsField $field
      * @param DomainsQuery $query
      * @param bool $static
      * @return null|string

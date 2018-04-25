@@ -67,7 +67,7 @@ class DomainsValidator extends Validator
     protected function validateElementAttribute(ElementInterface $element, string $attribute)
     {
         /** @var Element $element */
-        $value = $element->getFieldValue($attribute);
+        $value = $element->{$attribute};
 
         if (!$value instanceof DomainsQuery) {
             throw new Exception(sprintf(

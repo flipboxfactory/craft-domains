@@ -4,9 +4,10 @@ Changelog
 ## Unreleased
 ### Changed
 - Updated dependencies
+- Replacing field 'limit' with 'min' and 'max'
 
-### Added
-- Records now perform a limit validation regardless of how the domain association is made.
+### Fixed
+- Validators were throwing an exception due to how attributes names were getting passed.
 
 ## 1.0.0-rc.2 - 2018-03-27
 ### Changed
