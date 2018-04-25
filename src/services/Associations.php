@@ -143,17 +143,17 @@ class Associations extends SortableAssociations
         bool $validate = true
     ): bool {
         if($validate === true && null !== ($field = $this->resolveFieldFromQuery($query))) {
-            $errors = [];
+            $error = '';
 
             (new MinMaxValidator([
                 'min' => $field->min,
                 'max' => $field->max
-            ]))->validate($query, $errors);
+            ]))->validate($query, $error);
 
-            if(!empty($errors)) {
+            if(!empty($error)) {
                 DomainsPlugin::error(sprintf(
                     "Domains failed to save due to the following validation errors: '%s'",
-                    Json::encode($errors)
+                    Json::encode($error)
                 ));
                 return false;
             }
