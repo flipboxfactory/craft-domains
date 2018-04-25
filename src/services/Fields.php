@@ -40,7 +40,10 @@ class Fields extends SortableFields
     /**
      * @inheritdoc
      */
-    const TABLE_ALIAS = Domain::TABLE_ALIAS;
+    protected static function tableAlias(): string
+    {
+        return Domain::tableAlias();
+    }
 
     /**
      * @param FieldInterface $field

@@ -24,17 +24,20 @@ class Associations extends SortableAssociations
     /**
      * @inheritdoc
      */
-    const TABLE_ALIAS = Domain::TABLE_ALIAS;
-
-    /**
-     * @inheritdoc
-     */
     const SOURCE_ATTRIBUTE = Domain::SOURCE_ATTRIBUTE;
 
     /**
      * @inheritdoc
      */
     const TARGET_ATTRIBUTE = Domain::TARGET_ATTRIBUTE;
+
+    /**
+     * @inheritdoc
+     */
+    protected static function tableAlias(): string
+    {
+        return Domain::tableAlias();
+    }
 
     /**
      * @inheritdoc

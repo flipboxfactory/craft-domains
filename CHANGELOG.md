@@ -1,5 +1,13 @@
 Changelog
 =========
+
+## Unreleased
+### Changed
+- Updated dependencies
+
+### Added
+- Records now perform a limit validation regardless of how the domain association is made.
+
 ## 1.0.0-rc.2 - 2018-03-27
 ### Changed
 - Dependencies now rely on `Sortable Associations` package.
