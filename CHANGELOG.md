@@ -1,7 +1,7 @@
 Changelog
 =========
 
-## Unreleased
+## 1.0.0 - 2018-04-25
 ### Changed
 - Updated dependencies
 - Replacing field 'limit' with 'min' and 'max'
