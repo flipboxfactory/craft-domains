@@ -36,11 +36,22 @@ class MinMaxValidator extends ArrayValidator
      */
     protected function validateValue($value)
     {
-        if(!$value instanceof QueryInterface) {
-            return parent::validateValue($value);
+        if($value instanceof QueryInterface) {
+            return $this->validateQueryValue($value);
         }
 
-        $count = $value->count();
+        return parent::validateValue($value);
+    }
+
+    /**
+     * @param QueryInterface $query
+     * @return array|null the error message and the parameters to be inserted into the error message.
+     * Null should be returned if the data is valid.
+     */
+    protected function validateQueryValue(QueryInterface $query)
+    {
+        /** @var QueryInterface $value */
+        $count = $query->count();
 
         if ($this->min !== null && $count < $this->min) {
             return [$this->tooFew, ['min' => $this->min]];
