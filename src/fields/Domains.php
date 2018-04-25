@@ -148,7 +148,7 @@ class Domains extends Field implements FieldInterface
      */
     public function getInputHtml($value, ElementInterface $element = null): string
     {
-        return DomainsPlugin::getInstance()->getFields()->getTableHtml($this, $value, false);
+        return DomainsPlugin::getInstance()->getFields()->getInputHtml($this, $value, false);
     }
 
 

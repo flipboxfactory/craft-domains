@@ -130,7 +130,6 @@ class Fields extends SortableFields
         );
     }
 
-
     /**
      * @param DomainsField $field
      * @param DomainsQuery $query
@@ -139,7 +138,7 @@ class Fields extends SortableFields
      * @throws Exception
      * @throws \Twig_Error_Loader
      */
-    public function getTableHtml(DomainsField $field, DomainsQuery $query, bool $static)
+    public function getInputHtml(DomainsField $field, DomainsQuery $query, bool $static)
     {
         $columns = [
             'domain' => [
@@ -172,7 +171,8 @@ class Fields extends SortableFields
                 'name' => $field->handle,
                 'cols' => $columns,
                 'rows' => $query->all(),
-                'static' => $static
+                'static' => $static,
+                'field' => $field
             ]
         );
     }
