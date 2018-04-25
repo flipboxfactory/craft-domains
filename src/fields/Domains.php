@@ -88,8 +88,14 @@ class Domains extends Field implements FieldInterface
                 MinMaxValidator::class,
                 'min' => $this->min,
                 'max' => $this->max,
-                'tooFew' => Craft::t('domains', '{attribute} should contain at least {min, number} {min, plural, one{domain} other{domains}}.'),
-                'tooMany' => Craft::t('domains', '{attribute} should contain at most {max, number} {max, plural, one{domain} other{domains}}.'),
+                'tooFew' => Craft::t(
+                    'domains',
+                    '{attribute} should contain at least {min, number} {min, plural, one{domain} other{domains}}.'
+                ),
+                'tooMany' => Craft::t(
+                    'domains',
+                    '{attribute} should contain at most {max, number} {max, plural, one{domain} other{domains}}.'
+                ),
                 'skipOnEmpty' => false
             ]
         ];

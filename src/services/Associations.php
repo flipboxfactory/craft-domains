@@ -126,7 +126,7 @@ class Associations extends SortableAssociations
     protected function resolveFieldFromQuery(
         SortableAssociationQueryInterface $query
     ) {
-        if(null === ($fieldId = $this->resolveStringAttribute($query, 'fieldId'))) {
+        if (null === ($fieldId = $this->resolveStringAttribute($query, 'fieldId'))) {
             return null;
         }
 
@@ -142,7 +142,7 @@ class Associations extends SortableAssociations
         SortableAssociationQueryInterface $query,
         bool $validate = true
     ): bool {
-        if($validate === true && null !== ($field = $this->resolveFieldFromQuery($query))) {
+        if ($validate === true && null !== ($field = $this->resolveFieldFromQuery($query))) {
             $error = '';
 
             (new MinMaxValidator([
@@ -150,7 +150,7 @@ class Associations extends SortableAssociations
                 'max' => $field->max
             ]))->validate($query, $error);
 
-            if(!empty($error)) {
+            if (!empty($error)) {
                 DomainsPlugin::error(sprintf(
                     "Domains failed to save due to the following validation errors: '%s'",
                     Json::encode($error)

@@ -56,10 +56,10 @@ class Fields extends SortableFields
      */
     public function findById(int $id)
     {
-        if(null === ($field = ($this->fields[$id] ?? null))) {
+        if (null === ($field = ($this->fields[$id] ?? null))) {
             $field = Craft::$app->getFields()->getFieldById($id);
 
-            if(!$field instanceof DomainsField) {
+            if (!$field instanceof DomainsField) {
                 $field = false;
             }
 
