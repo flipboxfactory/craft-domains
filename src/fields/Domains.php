@@ -162,7 +162,8 @@ class Domains extends Field implements FieldInterface
     public function afterElementSave(ElementInterface $element, bool $isNew)
     {
         DomainsPlugin::getInstance()->getAssociations()->save(
-            $element->{$this->handle}
+            $element->{$this->handle},
+            false
         );
 
         parent::afterElementSave($element, $isNew);

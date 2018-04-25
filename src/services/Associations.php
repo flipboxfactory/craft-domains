@@ -8,12 +8,15 @@
 
 namespace flipbox\domains\services;
 
+use craft\helpers\Json;
 use flipbox\craft\sortable\associations\db\SortableAssociationQueryInterface;
 use flipbox\craft\sortable\associations\records\SortableAssociationInterface;
 use flipbox\craft\sortable\associations\services\SortableAssociations;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\records\Domain;
+use flipbox\domains\validators\MinMaxValidator;
 use yii\db\ActiveQuery;
+use flipbox\domains\Domains as DomainsPlugin;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
@@ -114,5 +117,48 @@ class Associations extends SortableAssociations
         return $this->query($source, $fieldId, $siteId)
             ->indexBy(static::TARGET_ATTRIBUTE)
             ->all();
+    }
+
+    /**
+     * @param SortableAssociationQueryInterface $query
+     * @return \flipbox\domains\fields\Domains|null
+     */
+    protected function resolveFieldFromQuery(
+        SortableAssociationQueryInterface $query
+    ) {
+        if(null === ($fieldId = $this->resolveStringAttribute($query, 'fieldId'))) {
+            return null;
+        }
+
+        return DomainsPlugin::getInstance()->getFields()->findById($fieldId);
+    }
+
+    /**
+     * @inheritdoc
+     * @param bool $validate
+     * @throws \Exception
+     */
+    public function save(
+        SortableAssociationQueryInterface $query,
+        bool $validate = true
+    ): bool {
+        if($validate === true && null !== ($field = $this->resolveFieldFromQuery($query))) {
+            $errors = [];
+
+            (new MinMaxValidator([
+                'min' => $field->min,
+                'max' => $field->max
+            ]))->validate($query, $errors);
+
+            if(!empty($errors)) {
+                DomainsPlugin::error(sprintf(
+                    "Domains failed to save due to the following validation errors: '%s'",
+                    Json::encode($errors)
+                ));
+                return false;
+            }
+        }
+
+        return parent::save($query);
     }
 }

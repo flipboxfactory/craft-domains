@@ -38,12 +38,37 @@ class Fields extends SortableFields
     const TARGET_ATTRIBUTE = Domain::TARGET_ATTRIBUTE;
 
     /**
+     * @var DomainsField[]
+     */
+    private $fields = [];
+
+    /**
      * @inheritdoc
      */
     protected static function tableAlias(): string
     {
         return Domain::tableAlias();
     }
+
+    /**
+     * @param int $id
+     * @return DomainsField|null
+     */
+    public function findById(int $id)
+    {
+        if(null === ($field = ($this->fields[$id] ?? null))) {
+            $field = Craft::$app->getFields()->getFieldById($id);
+
+            if(!$field instanceof DomainsField) {
+                $field = false;
+            }
+
+            $this->fields[$id] = $field;
+        }
+
+        return $field instanceof DomainsField ? $field : null;
+    }
+
 
     /**
      * @param FieldInterface $field

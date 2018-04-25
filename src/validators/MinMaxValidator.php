@@ -40,11 +40,6 @@ class MinMaxValidator extends ArrayValidator
             return parent::validateValue($value);
         }
 
-        /** @var $value QueryInterface */
-        if (!is_string($value)) {
-            return [$this->message, []];
-        }
-
         $count = $value->count();
 
         if ($this->min !== null && $count < $this->min) {
