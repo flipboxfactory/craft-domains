@@ -14,7 +14,7 @@ use flipbox\craft\sortable\associations\records\SortableAssociationInterface;
 use flipbox\craft\sortable\associations\services\SortableAssociations;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\records\Domain;
-use flipbox\domains\validators\MinMaxValidator;
+use flipbox\ember\validators\MinMaxValidator;
 use yii\db\ActiveQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 

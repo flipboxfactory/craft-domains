@@ -18,7 +18,7 @@ use craft\validators\ArrayValidator;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\validators\DomainsValidator;
-use flipbox\domains\validators\MinMaxValidator;
+use flipbox\ember\validators\MinMaxValidator;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
