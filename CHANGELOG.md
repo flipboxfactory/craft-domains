@@ -1,7 +1,7 @@
 Changelog
 =========
 
-## Unreleased
+## 1.1.0 - 2018-07-17
 ### Fixed
 - Domains were not saving to an element upon new element creation
 
