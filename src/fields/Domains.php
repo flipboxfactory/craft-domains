@@ -9,12 +9,10 @@
 namespace flipbox\domains\fields;
 
 use Craft;
-use craft\base\Element;
 use craft\base\ElementInterface;
 use craft\base\Field;
 use craft\base\FieldInterface;
 use craft\elements\db\ElementQueryInterface;
-use craft\validators\ArrayValidator;
 use flipbox\domains\db\DomainsQuery;
 use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\validators\DomainsValidator;

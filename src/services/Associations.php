@@ -13,10 +13,10 @@ use flipbox\craft\sortable\associations\db\SortableAssociationQueryInterface;
 use flipbox\craft\sortable\associations\records\SortableAssociationInterface;
 use flipbox\craft\sortable\associations\services\SortableAssociations;
 use flipbox\domains\db\DomainsQuery;
+use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\records\Domain;
 use flipbox\ember\validators\MinMaxValidator;
 use yii\db\ActiveQuery;
-use flipbox\domains\Domains as DomainsPlugin;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
