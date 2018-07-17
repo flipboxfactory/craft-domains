@@ -72,8 +72,8 @@ class Associations extends SortableAssociations
     protected function existingAssociations(
         SortableAssociationQueryInterface $query
     ): array {
-        $source = $this->resolveStringAttribute($query, static::SOURCE_ATTRIBUTE);
-        $field = $this->resolveStringAttribute($query, 'fieldId');
+        $source = $this->resolveStringAttribute($query, 'element');
+        $field = $this->resolveStringAttribute($query, 'field');
         $site = $this->resolveStringAttribute($query, 'siteId');
 
         if ($source === null || $field === null || $site === null) {
@@ -146,8 +146,8 @@ class Associations extends SortableAssociations
             $error = '';
 
             (new MinMaxValidator([
-                'min' => $field->min,
-                'max' => $field->max
+                'min' => $field->min ? (int)$field->min : null,
+                'max' => $field->max ? (int)$field->max : null
             ]))->validate($query, $error);
 
             if (!empty($error)) {

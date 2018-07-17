@@ -14,19 +14,14 @@ use yii\db\Expression;
 trait Attributes
 {
     /**
-     * @var string|string[]|false|null The domain(s). Prefix domains with "not " to exclude them.
+     * @var string|string[]|false|null The domain(s). Prefix with "not " to exclude them.
      */
     public $domain;
 
     /**
-     * @var int|int[]|false|null The element ID(s). Prefix IDs with "not " to exclude them.
+     * @var string|string[]|false|null The status(es). Prefix with "not " to exclude them.
      */
-    public $elementId;
-
-    /**
-     * @var int|int[]|false|null The field ID(s). Prefix IDs with "not " to exclude them.
-     */
-    public $fieldId;
+    public $status;
 
     /**
      * Adds an additional WHERE condition to the existing one.
@@ -44,47 +39,19 @@ trait Attributes
      * @param $value
      * @return static
      */
-    public function fieldId($value)
-    {
-        $this->fieldId = $value;
-        return $this;
-    }
-
-    /**
-     * @param $value
-     * @return static
-     */
-    public function field($value)
-    {
-        return $this->fieldId($value);
-    }
-
-    /**
-     * @param $value
-     * @return static
-     */
-    public function elementId($value)
-    {
-        $this->elementId = $value;
-        return $this;
-    }
-
-    /**
-     * @param $value
-     * @return static
-     */
-    public function element($value)
-    {
-        return $this->elementId($value);
-    }
-
-    /**
-     * @param $value
-     * @return static
-     */
     public function domain($value)
     {
         $this->domain = $value;
+        return $this;
+    }
+
+    /**
+     * @param $value
+     * @return static
+     */
+    public function status($value)
+    {
+        $this->status = $value;
         return $this;
     }
 
@@ -93,16 +60,12 @@ trait Attributes
      */
     protected function applyConditions()
     {
-        if ($this->fieldId !== null) {
-            $this->andWhere(Db::parseParam('fieldId', $this->fieldId));
-        }
-
         if ($this->domain !== null) {
             $this->andWhere(Db::parseParam('domain', $this->domain));
         }
 
-        if ($this->elementId !== null) {
-            $this->andWhere(Db::parseParam('elementId', $this->elementId));
+        if ($this->status !== null) {
+            $this->andWhere(Db::parseParam('domain', $this->status));
         }
     }
 }

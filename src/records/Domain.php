@@ -16,9 +16,8 @@ use flipbox\domains\Domains as DomainsPlugin;
 use flipbox\domains\fields\Domains;
 use flipbox\domains\validators\DomainValidator;
 use flipbox\ember\helpers\ModelHelper;
+use flipbox\ember\records\traits\ElementAttribute;
 use flipbox\ember\traits\SiteRules;
-use flipbox\ember\validators\LimitValidator;
-use yii\base\InvalidArgumentException;
 
 /**
  * @author Flipbox Factory <hello@flipboxfactory.com>
@@ -30,7 +29,9 @@ use yii\base\InvalidArgumentException;
  */
 class Domain extends SortableAssociation
 {
-    use SiteRules;
+    use SiteRules,
+        ElementAttribute,
+        traits\FieldAttribute;
 
     /**
      * @inheritdoc
@@ -46,6 +47,11 @@ class Domain extends SortableAssociation
      * @inheritdoc
      */
     const SOURCE_ATTRIBUTE = 'elementId';
+
+    /**
+     * @inheritdoc
+     */
+    protected $getterPriorityAttributes = ['fieldId', 'elementId', 'siteId'];
 
     /**
      * @inheritdoc
@@ -72,20 +78,15 @@ class Domain extends SortableAssociation
         return array_merge(
             parent::rules(),
             $this->siteRules(),
+            $this->elementRules(),
+            $this->fieldRules(),
             [
                 [
                     [
+                        self::TARGET_ATTRIBUTE,
                         'status',
-                        'fieldId',
                     ],
                     'required'
-                ],
-                [
-                    [
-                        'fieldId'
-                    ],
-                    'number',
-                    'integerOnly' => true
                 ],
                 [
                     'domain',
@@ -97,8 +98,17 @@ class Domain extends SortableAssociation
                     'range' => array_keys(Domains::getStatuses())
                 ],
                 [
+                    self::TARGET_ATTRIBUTE,
+                    'unique',
+                    'targetAttribute' => [
+                        'elementId',
+                        'siteId',
+                        self::TARGET_ATTRIBUTE
+                    ]
+                ],
+                [
                     [
-                        'fieldId',
+                        self::TARGET_ATTRIBUTE,
                         'status',
                     ],
                     'safe',

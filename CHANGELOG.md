@@ -1,6 +1,14 @@
 Changelog
 =========
 
+## Unreleased
+### Fixed
+- Domains were not saving to an element upon new element creation
+
+### Changed
+- `DomainsQuery::fieldId` is now `DomainsQuery::field` and now accepts a field object
+- `DomainsQuery::elementId` is now `DomainsQuery::element` and now accepts an element object
+
 ## 1.0.0 - 2018-04-25
 ### Changed
 - Updated dependencies

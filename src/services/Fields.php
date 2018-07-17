@@ -128,9 +128,9 @@ class Fields extends SortableFields
 
         return new Domain(
             [
-                'fieldId' => $field->id,
+                'field' => $field,
+                'element' => $element,
                 'domain' => ArrayHelper::getValue($value, 'domain'),
-                'elementId' => $element ? $element->getId() : false,
                 'status' => ArrayHelper::getValue($value, 'status'),
                 'siteId' => $this->targetSiteId($element),
                 'sortOrder' => $sortOrder++
