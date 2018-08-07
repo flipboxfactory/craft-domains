@@ -8,7 +8,6 @@
 
 namespace flipbox\domains\records;
 
-use Craft;
 use flipbox\craft\sortable\associations\records\SortableAssociation;
 use flipbox\craft\sortable\associations\services\SortableAssociations;
 use flipbox\domains\db\DomainsQuery;
@@ -96,15 +95,6 @@ class Domain extends SortableAssociation
                     'status',
                     'in',
                     'range' => array_keys(Domains::getStatuses())
-                ],
-                [
-                    self::TARGET_ATTRIBUTE,
-                    'unique',
-                    'targetAttribute' => [
-                        'elementId',
-                        'siteId',
-                        self::TARGET_ATTRIBUTE
-                    ]
                 ],
                 [
                     [
