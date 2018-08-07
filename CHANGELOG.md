@@ -1,6 +1,6 @@
 Changelog
 =========
-## Unreleased
+## 1.1.1 - 2018-08-06
 ### Fixed
 - When saving records, duplicate unique validation was occurring.
 
