@@ -90,7 +90,9 @@ trait ModifyElementsQueryTrait
         ElementQuery $query,
         string $value
     ) {
+        /** @var string $operator */
         $operator = ($value === ':notempty:' ? '!=' : '=');
+
         $query->subQuery->andWhere(
             $this->emptyValueSubSelect(
                 Domain::tableAlias(),
