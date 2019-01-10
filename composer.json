@@ -10,7 +10,7 @@
   ],
   "require": {
     "craftcms/cms": "^3.0",
-    "flipboxfactory/craft-ember": "^2.0.0"
+    "flipboxfactory/craft-ember": "^2.1"
   },
   "require-dev": {
     "phpunit/phpunit": "^5.0",
@@ -34,17 +34,14 @@
       "homepage": "https://flipboxdigital.com/"
     }
   ],
-  "support": {
-    "email": "support@flipboxdigital.com",
-    "issues": "https://github.com/flipboxfactory/craft-domains/issues?state=open",
-    "source": "https://github.com/flipboxfactory/craft-domains",
-    "docs": "https://github.com/flipboxfactory/craft-domains",
-    "rss": "https://github.com/flipboxfactory/craft-domains/commits/master.atom"
-  },
   "extra": {
     "name": "Domains",
     "handle": "domains",
     "class": "flipbox\\craft\\domains\\Domains",
+    "developer": "Flipbox Digital",
+    "developerUrl": "https://www.flipboxdigital.com",
+    "changelogUrl": "https://raw.githubusercontent.com/flipboxfactory/craft-domains/master/CHANGELOG.md",
+    "documentationUrl": "https://github.com/flipboxfactory/craft-domains/blob/master/README.md",
     "hasCpSettings": false,
     "hasCpSection": false,
     "schemaVersion": "2.0.0"

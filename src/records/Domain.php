@@ -136,31 +136,14 @@ class Domain extends ActiveRecord
      */
     public function afterDelete()
     {
-        $sortOrderAttribute = 'sortOrder';
-        $targetAttribute = 'domain';
-        $sortOrderCondition = [
-            'elementId' => $this->elementId,
-            'fieldId' => $this->fieldId,
-            'siteId' => $this->siteId
-        ];
-
-        // All records (sorted)
-        $sortOrder = $this->sortOrderQuery($sortOrderCondition, $sortOrderAttribute)
-            ->indexBy($targetAttribute)
-            ->select([$sortOrderAttribute])
-            ->column();
-
-        if (count($sortOrder) > 0) {
-            $this->saveNewOrder(
-                array_flip(array_combine(
-                    range($sortOrder, count($sortOrder)),
-                    array_keys($sortOrder)
-                )),
-                $targetAttribute,
-                $sortOrderCondition,
-                $sortOrderAttribute
-            );
-        }
+        $this->sequentialOrder(
+            'domain',
+            [
+                'elementId' => $this->elementId,
+                'fieldId' => $this->fieldId,
+                'siteId' => $this->siteId
+            ]
+        );
 
         parent::afterDelete();
     }
