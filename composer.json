@@ -47,6 +47,6 @@
     "class": "flipbox\\craft\\domains\\Domains",
     "hasCpSettings": false,
     "hasCpSection": false,
-    "schemaVersion": "1.0.0"
+    "schemaVersion": "2.0.0"
   }
 }
