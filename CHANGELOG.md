@@ -1,5 +1,10 @@
 Changelog
 =========
+## 2.0.0 - 2019-01-09
+### Changed
+- Namespace alterations for all classes
+- Updated breaking dependencies 
+
 ## 1.1.1 - 2018-08-06
 ### Fixed
 - When saving records, duplicate unique validation was occurring.
