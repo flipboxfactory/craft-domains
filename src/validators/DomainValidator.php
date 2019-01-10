@@ -6,7 +6,7 @@
  * @link       https://www.flipboxfactory.com/software/domains/
  */
 
-namespace flipbox\domains\validators;
+namespace flipbox\craft\domains\validators;
 
 use Craft;
 use yii\validators\Validator;

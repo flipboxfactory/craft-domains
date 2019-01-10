@@ -6,14 +6,14 @@
  * @link       https://www.flipboxfactory.com/software/domains/
  */
 
-namespace flipbox\domains\validators;
+namespace flipbox\craft\domains\validators;
 
 use Craft;
 use craft\base\Element;
 use craft\base\ElementInterface;
-use flipbox\domains\db\DomainsQuery;
-use flipbox\domains\fields\Domains;
-use flipbox\domains\records\Domain;
+use flipbox\craft\domains\queries\DomainsQuery;
+use flipbox\craft\domains\fields\Domains;
+use flipbox\craft\domains\records\Domain;
 use yii\base\Exception;
 use yii\base\Model;
 use yii\validators\Validator;
@@ -31,6 +31,7 @@ class DomainsValidator extends Validator
 
     /**
      * @inheritdoc
+     * @throws Exception
      */
     public function init()
     {

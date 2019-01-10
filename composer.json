@@ -1,6 +1,6 @@
 {
   "name": "flipboxfactory/craft-domains",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "Element domains",
   "type": "craft-plugin",
   "keywords": [
@@ -10,8 +10,7 @@
   ],
   "require": {
     "craftcms/cms": "^3.0",
-    "flipboxfactory/craft-ember": "^1.0.1",
-    "flipboxfactory/craft-sortable-associations": "^1.0"
+    "flipboxfactory/craft-ember": "^2.0.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^5.0",
@@ -20,12 +19,12 @@
   },
   "autoload": {
     "psr-4": {
-      "flipbox\\domains\\": "src/"
+      "flipbox\\craft\\domains\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "flipbox\\domains\\tests\\": "tests/src/"
+      "flipbox\\craft\\domains\\tests\\": "tests/src/"
     }
   },
   "license": "MIT",
@@ -37,22 +36,17 @@
   ],
   "support": {
     "email": "support@flipboxdigital.com",
-    "issues": "https://github.com/flipboxfactory/domains/issues?state=open",
-    "source": "https://github.com/flipboxfactory/domains",
-    "docs": "https://github.com/flipboxfactory/domains",
-    "rss": "https://github.com/flipboxfactory/domains/commits/master.atom"
+    "issues": "https://github.com/flipboxfactory/craft-domains/issues?state=open",
+    "source": "https://github.com/flipboxfactory/craft-domains",
+    "docs": "https://github.com/flipboxfactory/craft-domains",
+    "rss": "https://github.com/flipboxfactory/craft-domains/commits/master.atom"
   },
   "extra": {
     "name": "Domains",
     "handle": "domains",
-    "class": "flipbox\\domains\\Domains",
+    "class": "flipbox\\craft\\domains\\Domains",
     "hasCpSettings": false,
     "hasCpSection": false,
-    "schemaVersion": "1.0.0",
-    "components": {
-      "fields": "flipbox\\domains\\services\\Fields",
-      "domains": "flipbox\\domains\\services\\Domains",
-      "associations": "flipbox\\domains\\services\\Associations"
-    }
+    "schemaVersion": "1.0.0"
   }
 }

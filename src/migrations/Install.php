@@ -1,12 +1,12 @@
 <?php
 
-namespace flipbox\domains\migrations;
+namespace flipbox\craft\domains\migrations;
 
 use craft\db\Migration;
 use craft\records\Element;
 use craft\records\Field;
 use craft\records\Site;
-use flipbox\domains\records\Domain;
+use flipbox\craft\domains\records\Domain;
 
 class Install extends Migration
 {
