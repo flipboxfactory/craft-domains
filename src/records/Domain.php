@@ -150,7 +150,7 @@ class Domain extends ActiveRecord
             ->select([$sortOrderAttribute])
             ->column();
 
-        if(count($sortOrder) > 0) {
+        if (count($sortOrder) > 0) {
             $this->saveNewOrder(
                 array_flip(array_combine(
                     range($sortOrder, count($sortOrder)),
