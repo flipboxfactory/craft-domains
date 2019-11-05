@@ -1,5 +1,9 @@
 Changelog
 =========
+## 2.0.1 - 2019-10-04
+### Fixed
+- Domains should be returned in order based upon their sortOrder value.
+
 ## 2.0.0 - 2019-01-09
 ### Changed
 - Namespace alterations for all classes

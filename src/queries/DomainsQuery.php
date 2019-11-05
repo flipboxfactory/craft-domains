@@ -37,6 +37,13 @@ class DomainsQuery extends CacheableActiveQuery
     public $status;
 
     /**
+     * @var array
+     */
+    public $orderBy = [
+        'sortOrder' => SORT_ASC
+    ];
+
+    /**
      * @param array $config
      * @return $this
      */
