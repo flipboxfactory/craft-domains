@@ -147,7 +147,7 @@ class Domains extends Field implements FieldInterface
      */
     public function getInputHtml($value, ElementInterface $element = null): string
     {
-        return $this->inputHtml($value, false);
+        return $this->renderInputHtml($value, false);
     }
 
     /**
@@ -157,7 +157,7 @@ class Domains extends Field implements FieldInterface
      * @throws \Twig_Error_Loader
      * @throws \yii\base\Exception
      */
-    protected function inputHtml(DomainsQuery $query, bool $static)
+    protected function renderInputHtml(DomainsQuery $query, bool $static)
     {
         $columns = [
             'domain' => [

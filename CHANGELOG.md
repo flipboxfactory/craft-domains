@@ -1,5 +1,10 @@
 Changelog
 =========
+
+## 2.0.2 - 2021-01-17
+### Fixed
+- Conflict with `Field::inputHtml` in Craft 3.6
+
 ## 2.0.1 - 2019-10-04
 ### Fixed
 - Domains should be returned in order based upon their sortOrder value.
